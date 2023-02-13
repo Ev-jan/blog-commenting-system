@@ -14,73 +14,59 @@
       <main class="content-container">
         <div class="side-menu o-bg-styler"></div>
         <div class="content-section">
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
-          <p class="content-text o-bg-styler">
-
-          </p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
+          <p class="content-text o-bg-styler"></p>
         </div>
         <div class="comment-section">
           <hr class="rule"/>
           <nav class="comment-navigation comment-section__comment-navigation">
-              <div class="comment-navigation__item" id="comment-nav-comment">
-                Комментарии <span class="comment-count">(2)</span>
+              <div class="comment-navigation__item">
+                <span>Комментарии</span>&nbsp;<span class="comment-count" id="">(0)</span>
               </div>
               <div class="drop-down-btn comment-navigation__item">
-               
+                Текст 
+                <img class="comment-navigation__icon" src="../public/assets/interface-images/arrow-drop-down.svg" alt="dropdown menu">
+              </div>
+               <div class="drop-down-content">
                 <ul class="drop-down-menu">
                   <li class="drop-down-menu__item">По дате</li>
                   <li class="drop-down-menu__item">По количеству оценок</li>
                   <li class="drop-down-menu__item">По актуальности</li>
                   <li class="drop-down-menu__item">По количеству ответов</li>
                 </ul>
-              </div>
+               </div>
               <div class="comment-navigation__item" id="comment-nav-sort-fav">
                 Избранное
+                <img class="comment-navigation__icon" src="../public/assets/interface-images/icon-favourite.svg" alt="favourite comments">
               </div>
           </nav>
           <div class="comment-form comment-section__comment-form">
             <div class="avatar comment-section__avatar">
               <img
                 class="avatar-image"
-                src="./assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
+                src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
                 alt="Avatar"
               />
             </div>
             <div class="comment-info-container">
-              <h4 class="username">Имя пользователя</h4>
-              <p class="input-char-count-message">Макс. 1000 символов</p>
+              <h4 class="username" id="comment-form-username">Имя пользователя</h4>
+              <p class="input-char-count-message" id="">Макс. 1000 символов</p>
             </div>
-            <p class="char-overlimit-message">Слишком длинное сообщение</p>
+            <p class="char-overlimit-message" id="overlimit-msg">Слишком длинное сообщение</p>
             <form action="" class="comment-form" id="comment-form">
               <textarea
                 name="new-comment"
                 maxlength="1000"
                 minlength="1"
-                id="comment-textarea"
-                class="comment-textarea"
+                class="comment-form__input"
+                id="comment-input-field"
                 form="comment-form"
                 placeholder="Введите текст сообщения..."
               ></textarea>
@@ -88,7 +74,7 @@
             <button
               type="submit"
               class="button-style-default o-text-18-op-4 submit-button"
-              id="btn"
+              id="post-comment-btn"
               form="comment-form"
             >
               Отправить
@@ -99,7 +85,7 @@
                 <div class="avatar">
                   <img
                     class="avatar-image"
-                    src="./assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
+                    src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
                     alt="Avatar"
                   />
                 </div>
@@ -123,7 +109,7 @@
                   <button class="btn-reply button-style-default o-text-18-op-4">
                     <img
                       class="button-icon"
-                      src="/assets/interface-images/icon-reply.svg"
+                      src="../public/assets/interface-images/icon-reply.svg"
                       alt="reply"
                     />
                     Ответить
@@ -134,7 +120,7 @@
                   >
                     <img
                       class="button-icon"
-                      src="/assets/interface-images/icon-saved.svg"
+                      src="../public/assets/interface-images/icon-saved.svg"
                       alt="add to favourite"
                     />
                     В избранное
@@ -145,7 +131,7 @@
                       id="downvote"
                     >
                       <img
-                        src="/assets/interface-images/icon-downvote.svg"
+                        src="../public/assets/interface-images/icon-downvote.svg"
                         alt="vote down"
                       />
                     </button>
@@ -155,7 +141,7 @@
                       id="upvote"
                     >
                       <img
-                        src="/assets/interface-images/icon-upvote.svg"
+                        src="../public/assets/interface-images/icon-upvote.svg"
                         alt="vote up"
                       />
                     </button>
@@ -166,14 +152,14 @@
                   <div class="avatar">
                     <img
                       class="avatar-image"
-                      src="./assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
+                      src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
                       alt="Avatar"
                     />
                   </div>
                   <div class="comment-info-container">
                     <h4 class="username">John Doe</h4>
                     <div class="replied-user-info o-text-18-op-4">
-                      <img class="replied-user-info__icon" src="/assets/interface-images/icon-reply.svg" alt="Replied to">
+                      <img class="replied-user-info__icon" src="../public/assets/interface-images/icon-reply.svg" alt="Replied to">
                       <div class="replied-user-info__text">Алексей_1994b</div>
                     </div>
                     <time datetime="13:55 01-15" class="timestamp"
@@ -195,7 +181,7 @@
                       >
                         <img
                           class="button-icon"
-                          src="/assets/interface-images/icon-saved.svg"
+                          src="../public/assets/interface-images/icon-saved.svg"
                           alt="reply"
                         />
                         В избранное
@@ -206,7 +192,7 @@
                           id="downvote"
                         >
                           <img
-                            src="/assets/interface-images/icon-downvote.svg"
+                            src="../public/assets/interface-images/icon-downvote.svg"
                             alt="vote down"
                           />
                         </button>
@@ -216,7 +202,7 @@
                           id="upvote"
                         >
                           <img
-                            src="/assets/interface-images/icon-upvote.svg"
+                            src="../public/assets/interface-images/icon-upvote.svg"
                             alt="vote up"
                           />
                         </button>
@@ -230,14 +216,8 @@
       </main>
     </div>
     <footer></footer>
-    <script type="text/javascript">
-      textarea = document.querySelector("#comment-textarea");
-      textarea.addEventListener("input", autoResize, false);
-
-      function autoResize() {
-        this.style.height = "auto";
-        this.style.height = this.scrollHeight + "px";
-      }
+    <script> var exports = {}</script>
+    <script type="module" src="../src/index.js">
     </script>
   </body>
 </html>

@@ -1,0 +1,25 @@
+{
+  "name": "p-8-commenting-system",
+  "version": "1.0.0",
+  "description": "p-8-commenting-system",
+  "main": "index.js",
+  "scripts": {
+    "test": "none"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ev-jan/p-8-commenting-system.git"
+  },
+  "keywords": [
+    "commenting",
+    "system",
+    "TS",
+    "ES6"
+  ],
+  "author": "Evgeny Mazyar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ev-jan/p-8-commenting-system/issues"
+  },
+  "homepage": "https://github.com/Ev-jan/p-8-commenting-system#readme"
+}
