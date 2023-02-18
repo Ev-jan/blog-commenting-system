@@ -7,7 +7,6 @@
     <title>TS Commenting System</title>
     <link rel="stylesheet" href="/public/styles.css" />
   </head>
-
   <body>
     <div class="restraining-container">
       <header class="header o-bg-styler"></header>
@@ -25,199 +24,46 @@
           <p class="content-text o-bg-styler"></p>
         </div>
         <div class="comment-section">
-          <hr class="rule"/>
+          <hr class="rule" />
           <nav class="comment-navigation comment-section__comment-navigation">
-              <div class="comment-navigation__item">
-                <span>Комментарии</span>&nbsp;<span class="comment-count" id="">(0)</span>
-              </div>
-              <div class="drop-down-btn comment-navigation__item">
-                Текст 
-                <img class="comment-navigation__icon" src="../public/assets/interface-images/arrow-drop-down.svg" alt="dropdown menu">
-              </div>
-               <div class="drop-down-content">
-                <ul class="drop-down-menu">
-                  <li class="drop-down-menu__item">По дате</li>
-                  <li class="drop-down-menu__item">По количеству оценок</li>
-                  <li class="drop-down-menu__item">По актуальности</li>
-                  <li class="drop-down-menu__item">По количеству ответов</li>
-                </ul>
-               </div>
-              <div class="comment-navigation__item" id="comment-nav-sort-fav">
-                Избранное
-                <img class="comment-navigation__icon" src="../public/assets/interface-images/icon-favourite.svg" alt="favourite comments">
-              </div>
-          </nav>
-          <div class="comment-form comment-section__comment-form">
-            <div class="avatar comment-section__avatar">
+            <div class="comment-navigation__item">
+              <span>Комментарии</span>&nbsp;<span class="comment-count" id=""
+                >(0)</span
+              >
+            </div>
+            <div class="drop-down-btn comment-navigation__item">
+              Текст
               <img
-                class="avatar-image"
-                src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
-                alt="Avatar"
+                class="comment-navigation__icon"
+                src="../public/assets/interface-images/arrow-drop-down.svg"
+                alt="dropdown menu"
               />
             </div>
-            <div class="comment-info-container">
-              <h4 class="username" id="comment-form-username">Имя пользователя</h4>
-              <p class="input-char-count-message" id="">Макс. 1000 символов</p>
-            </div>
-            <p class="char-overlimit-message" id="overlimit-msg">Слишком длинное сообщение</p>
-            <form action="" class="comment-form" id="comment-form">
-              <textarea
-                name="new-comment"
-                maxlength="1000"
-                minlength="1"
-                class="comment-form__input"
-                id="comment-input-field"
-                form="comment-form"
-                placeholder="Введите текст сообщения..."
-              ></textarea>
-            </form>
-            <button
-              type="submit"
-              class="button-style-default o-text-18-op-4 submit-button"
-              id="post-comment-btn"
-              form="comment-form"
-            >
-              Отправить
-            </button>
-          </div>
-          <ul class="comment-thread">
-            <li class="thread__item thread-item_layout">
-                <div class="avatar">
-                  <img
-                    class="avatar-image"
-                    src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
-                    alt="Avatar"
-                  />
-                </div>
-                <div class="comment-info-container">
-                  <h4 class="username">John Doe</h4>
-                  <time datetime="13:55 01-15" class="timestamp"
-                    >15.01 13:55</time
-                  >
-                </div>
-                <p class="comment-body">
-                  Самое обидное когда сценарий по сути есть - в виде книг, где
-                  нет сюжетных дыр, всё логично, стройное повествование и
-                  достаточно взять и экранизировать оригинал как это было в
-                  первых фильмах с минимальным количеством отсебятины и зритель
-                  с восторгом примет любой такой фильм и сериал, однако вместо
-                  этого 'Кольца власти' просто позаимствовали имена из
-                  оригинала, куски истории, мало связанные между собой и выдали
-                  очередной среднячковый сериал на один раз в лучшем случае.
-                </p>
-                <div class="action-bar">
-                  <button class="btn-reply button-style-default o-text-18-op-4">
-                    <img
-                      class="button-icon"
-                      src="../public/assets/interface-images/icon-reply.svg"
-                      alt="reply"
-                    />
-                    Ответить
-                  </button>
-                  <button
-                    class="btn-favourite button-style-default o-text-18-op-4"
-                    id="btn-fav"
-                  >
-                    <img
-                      class="button-icon"
-                      src="../public/assets/interface-images/icon-saved.svg"
-                      alt="add to favourite"
-                    />
-                    В избранное
-                  </button>
-                  <div class="comment-rating">
-                    <button
-                      class="btn-rating__icon_downvote button-style-default"
-                      id="downvote"
-                    >
-                      <img
-                        src="../public/assets/interface-images/icon-downvote.svg"
-                        alt="vote down"
-                      />
-                    </button>
-                    <div class="btn-rating__count o-text-18-op-4">0</div>
-                    <button
-                      class="btn-rating__icon_upvote button-style-default"
-                      id="upvote"
-                    >
-                      <img
-                        src="../public/assets/interface-images/icon-upvote.svg"
-                        alt="vote up"
-                      />
-                    </button>
-                  </div>
-                </div>
-              <ul class="replies">
-                <li class="reply thread-item_layout">
-                  <div class="avatar">
-                    <img
-                      class="avatar-image"
-                      src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
-                      alt="Avatar"
-                    />
-                  </div>
-                  <div class="comment-info-container">
-                    <h4 class="username">John Doe</h4>
-                    <div class="replied-user-info o-text-18-op-4">
-                      <img class="replied-user-info__icon" src="../public/assets/interface-images/icon-reply.svg" alt="Replied to">
-                      <div class="replied-user-info__text">Алексей_1994b</div>
-                    </div>
-                    <time datetime="13:55 01-15" class="timestamp"
-                      >15.01 13:55</time
-                    >
-                  </div>
-                    <p class="comment-body">
-                      Наверное, самая большая ошибка создателей сериала была в
-                      том, что они поставили уж слишком много надежд на
-                      поддержку фанатов вселенной. Как оказалось на деле,
-                      большинство 'фанатов' с самой настоящей яростью и желчью
-                      стали уничтожать сериал, при этом объективности в отзывах
-                      самый минимум.
-                    </p>
-                    <div class="action-bar">
-                      <button
-                        class="btn-favourite button-style-default o-text-18-op-4"
-                        id="btn-fav"
-                      >
-                        <img
-                          class="button-icon"
-                          src="../public/assets/interface-images/icon-saved.svg"
-                          alt="reply"
-                        />
-                        В избранное
-                      </button>
-                      <div class="comment-rating">
-                        <button
-                          class="btn-rating__icon_downvote button-style-default"
-                          id="downvote"
-                        >
-                          <img
-                            src="../public/assets/interface-images/icon-downvote.svg"
-                            alt="vote down"
-                          />
-                        </button>
-                        <div class="btn-rating__count o-text-18-op-4">0</div>
-                        <button
-                          class="btn-rating__icon_upvote button-style-default"
-                          id="upvote"
-                        >
-                          <img
-                            src="../public/assets/interface-images/icon-upvote.svg"
-                            alt="vote up"
-                          />
-                        </button>
-                      </div>
-                    </div>
-                </li>
+            <div class="drop-down-content">
+              <ul class="drop-down-menu">
+                <li class="drop-down-menu__item">По дате</li>
+                <li class="drop-down-menu__item">По количеству оценок</li>
+                <li class="drop-down-menu__item">По актуальности</li>
+                <li class="drop-down-menu__item">По количеству ответов</li>
               </ul>
-            </li>
+            </div>
+            <div class="comment-navigation__item" id="comment-nav-sort-fav">
+              Избранное
+              <img
+                class="comment-navigation__icon"
+                src="../public/assets/interface-images/icon-favourite.svg"
+                alt="favourite comments"
+              />
+            </div>
+          </nav>
+          <ul class="comment-thread">
           </ul>
         </div>
       </main>
     </div>
     <footer></footer>
-    <script> var exports = {}</script>
-    <script type="module" src="../src/index.js">
+    <script>
     </script>
+    <script type="module" src="../src/index.js"></script>
   </body>
 </html>

@@ -1,54 +1,55 @@
-import { IComment } from "../interfaces/Interfaces";
-import { Services } from "../services/services";
+import { IComment, ICommentForm } from "../interfaces/Interfaces.js";
+import { Services } from "../services/services.js";
+import { DOMHelpsters } from "../services/DOMHelpsters.js";
+import { CommentFormComponent } from "./CommentForm.js";
 
 export class CommentComponent implements IComment {
-  id: number;
-  text: string;
+  id: number = Services.generateId();
+  text: string | null;
   author: string;
-  timestamp: Date;
+  timeStamp: string = Services.getCurrentTimeStamp();
   avatar: string;
-  votes: number | null;
-  favourite: boolean;
+  votes?: number | null;
+  favourite?: boolean;
+  formIsHidden: boolean = false;
 
   constructor(
-    id: number,
-    text: string,
     author: string,
-    timestamp: Date,
+    text: string | null,
     avatar: string,
-    votes: number | null,
-    favourite: boolean
+    votes?: number | null,
+    favourite?: boolean
   ) {
-    this.id = id;
-    this.text = text;
     this.author = author;
-    this.timestamp = timestamp;
+    this.text = text;
     this.avatar = avatar;
     this.votes = votes;
     this.favourite = favourite;
   }
 
-  public render(): void {
-    const commentThread:HTMLElement|null = document.querySelector(".comment-thread");
-    const content = `
-      <li class="thread__item thread-item_layout">
+  public createComment(parentNode: HTMLElement): void {
+    const commentNode: HTMLElement = DOMHelpsters.createElement("li", [
+      "thread__item",
+      "thread-item_layout",
+    ]);
+    const content: string = `
       <div class="avatar">
         <img
           class="avatar-image"
-          src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
+          src="${this.avatar}"
           alt="Avatar"
         />
       </div>
       <div class="comment-info-container">
-        <h4 class="username">John Doe</h4>
+        <h4 class="username">${this.author}</h4>
         <time datetime="13:55 01-15" class="timestamp"
-          >15.01 13:55</time
+          >${this.timeStamp}</time
         >
       </div>
-      <p class="comment-body">
+      <p class="comment-body">${this.text}
       </p>
       <div class="action-bar">
-        <button class="btn-reply button-style-default o-text-18-op-4">
+        <button class="btn-reply button-style-default o-text-18-op-4" id="btn-reply-${this.id}">
           <img
             class="button-icon"
             src="../public/assets/interface-images/icon-reply.svg"
@@ -57,7 +58,7 @@ export class CommentComponent implements IComment {
           Ответить
         </button>
         <button
-          class="btn-favourite button-style-default o-text-18-op-4"
+          class="btn-favourite button-style-default o-text-18-op-4" id="btn-favourite-${this.id}"
           id="btn-fav"
         >
           <img
@@ -70,17 +71,17 @@ export class CommentComponent implements IComment {
         <div class="comment-rating">
           <button
             class="btn-rating__icon_downvote button-style-default"
-            id="downvote"
+            id="downvote-${this.id}"
           >
             <img
               src="../public/assets/interface-images/icon-downvote.svg"
               alt="vote down"
             />
           </button>
-          <div class="btn-rating__count o-text-18-op-4">0</div>
+          <div class="btn-rating__count o-text-18-op-4">${this.votes}</div>
           <button
             class="btn-rating__icon_upvote button-style-default"
-            id="upvote"
+            id="upvote-${this.id}"
           >
             <img
               src="../public/assets/interface-images/icon-upvote.svg"
@@ -89,77 +90,64 @@ export class CommentComponent implements IComment {
           </button>
         </div>
       </div>
-    <ul class="replies">
-      <li class="reply thread-item_layout">
-        <div class="avatar">
-          <img
-            class="avatar-image"
-            src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
-            alt="Avatar"
-          />
-        </div>
-        <div class="comment-info-container">
-          <h4 class="username">John Doe</h4>
-          <div class="replied-user-info o-text-18-op-4">
-            <img class="replied-user-info__icon" src="../public/assets/interface-images/icon-reply.svg" alt="Replied to">
-            <div class="replied-user-info__text">Алексей_1994b</div>
-          </div>
-          <time datetime="13:55 01-15" class="timestamp"
-            >15.01 13:55</time
-          >
-        </div>
-          <p class="comment-body">
-          </p>
-          <div class="action-bar">
-            <button
-              class="btn-favourite button-style-default o-text-18-op-4"
-              id="btn-fav"
-            >
-              <img
-                class="button-icon"
-                src="../public/assets/interface-images/icon-saved.svg"
-                alt="reply"
-              />
-              В избранное
-            </button>
-            <div class="comment-rating">
-              <button
-                class="btn-rating__icon_downvote button-style-default"
-                id="downvote"
-              >
-                <img
-                  src="../public/assets/interface-images/icon-downvote.svg"
-                  alt="vote down"
-                />
-              </button>
-              <div class="btn-rating__count o-text-18-op-4">0</div>
-              <button
-                class="btn-rating__icon_upvote button-style-default"
-                id="upvote"
-              >
-                <img
-                  src="../public/assets/interface-images/icon-upvote.svg"
-                  alt="vote up"
-                />
-              </button>
-            </div>
-          </div>
-      </li>
-    </ul>
-  </li>
+      <ul class="replies" id="replies-${this.id}">      
+      </ul>
       `;
-    Services.render(commentThread, content);
+
+    parentNode.insertBefore(commentNode, parentNode.firstChild);
+    DOMHelpsters.renderElement(commentNode, content);
   }
 
-  public reply():void {}
-  /**
-   * voteCount
-   */
-  public voteCount():void {
-    
-  }
+  public updateComment() {
+    const replyBtn = document.getElementById(
+      `btn-reply-${this.id}`
+    ) as HTMLButtonElement | null;
+    const commentFormParentNode = document.getElementById(`replies-${this.id}`);
+    if (replyBtn && commentFormParentNode) {
+      const replyForm = new CommentFormComponent(this.author, this.id);
+      const toggleInput = (event: Event) => {
+        if (this.formIsHidden === false) {
+          replyForm.createCommentForm(commentFormParentNode, "reply");
+          const inputNode = DOMHelpsters.getElementOOClass(
+            `comment-input-field-${this.id}`,
+            "comment-form__input"
+          ) as HTMLTextAreaElement;
 
-  public addToFavorite(){
+          const textLenDisplayNode = DOMHelpsters.getElementOOClass(
+            `input-char-count-message-${this.id}`,
+            "input-char-count-message"
+          );
+          const overlimitMsgNode = DOMHelpsters.getElementOOClass(
+            `overlimit-msg-${this.id}`,
+            "char-overlimit-message"
+          );
+          const postButton = DOMHelpsters.getElementOOClass(
+            `post-comment-btn-${this.id}`,
+            "button-style-default o-text-18-op-4 submit-button"
+          ) as HTMLButtonElement | null;
 
+          postButton?.addEventListener("click", (event: Event) => {
+            DOMHelpsters.deletElementById(`comment-form-${this.id}`);
+            this.formIsHidden = false;
+          })
+
+          replyForm.updateCommentForm(
+            inputNode,
+            textLenDisplayNode,
+            overlimitMsgNode,
+            postButton,
+            commentFormParentNode,
+            "reply"
+          );
+
+          this.formIsHidden = true;
+        } else {
+          this.formIsHidden = false;
+          DOMHelpsters.deletElementById(`comment-form-${this.id}`);
+        }
+      };
+      replyBtn.addEventListener("click", toggleInput, false);
+      this.formIsHidden = false;
+    }
   }
 }

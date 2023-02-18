@@ -1,66 +1,66 @@
-import { ICommentForm } from "../interfaces/Interfaces.js";
+import { IComment, ICommentForm, IReply } from "../interfaces/Interfaces.js";
 import { Services } from "../services/services.js";
+import { DOMHelpsters } from "../services/DOMHelpsters.js";
+import { CommentComponent } from "./Comment.js";
+import { ReplyComponent } from "./Reply.js";
 
 export class CommentFormComponent implements ICommentForm {
   author: string;
-  message: string;
-  private inputFieldNode = document.getElementById(
-    "comment-input-field"
-  ) as HTMLTextAreaElement;
-  private postCommentBtn: HTMLElement | null = document.getElementById(
-    "post-comment-btn"
-  ) as HTMLButtonElement;
-  private textLenDisplayNode: HTMLElement | null = document.querySelector(
-    ".input-char-count-message"
-  ) as HTMLParagraphElement;
-  private userNameNode: HTMLElement | null = document.getElementById(
-    "comment-form-username"
-  ) as HTMLHeadingElement;
-  private overlimitMsgNode: HTMLElement | null =
-    document.getElementById("overlimit-msg");
+  private minTextLength: number = 1;
+  private maxTextLength: number = 1000;
+  id: number;
+  private text: string | null = "";
+  private avatar: string =
+    "../public/assets/interface-images/icon-default-avatar.png";
+  votes: number = 0;
+  favourite: boolean = false;
+  comment: IComment;
+  reply: IReply;
 
-  constructor(author: string, message: string) {
+
+  constructor(author: string, id: number) {
     this.author = author;
-    this.message = message;
+    this.id = id;
+    this.comment = new CommentComponent(
+      this.author,
+      this.text,
+      this.avatar,
+      this.votes,
+      this.favourite
+    );
+    this.reply = new ReplyComponent(
+      this.author,
+      this.text,
+      this.avatar,
+      this.comment.author
+    );
   }
 
-  // defining functionality:
-  getInput() {} // get user's message
-
-  validateInput() {} // make sure that: 1. input is string, (2) not an empty string (3) shorter or equal to 1k characters
-  private countInputCharacters() {} // counts characters in textarea and shows how many are available
-  // if number of characters is less than 1k - return current number of characters otherwise return false
-
-  private showOverLimitMessage() {} // shows error message on overlimit
-
-  public postComment() {} // should it belong here or with comment class? must be here
-
-  private putTimeStamp() {} // take this date and show it in a specific HTML element
-
-  // creating and displaying UI components
-
-  public displayCommentForm(parentNode: HTMLElement): void {
-    const commentFormNode: HTMLDivElement = document.createElement("div");
-    const content: string = `<div class="comment-form comment-section__comment-form">
+  public createCommentForm(
+    parentNode: HTMLElement | null,
+    commentType: string
+  ): void {
+    const commentFormNode: HTMLElement = DOMHelpsters.createElement("div");
+    const content: string = `<div class="comment-form comment-section__comment-form" id="comment-form-${this.id}">
     <div class="avatar comment-section__avatar">
       <img
         class="avatar-image"
-        src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
+        src="${this.avatar}"
         alt="Avatar"
       />
     </div>
     <div class="comment-info-container">
-      <h4 class="username" id="comment-form-username">${this.author}</h4>
-      <p class="input-char-count-message" id="">Макс. 1000 символов</p>
+      <h4 class="username" id="comment-input-field-${this.id}">${this.author}</h4>
+      <p class="input-char-count-message" id="input-char-count-message-${this.id}">Макс. 1000 символов</p>
     </div>
-    <p class="char-overlimit-message" id="overlimit-msg">Слишком длинное сообщение</p>
-    <form action="" class="comment-form" id="comment-form">
+    <p class="char-overlimit-message" id="overlimit-msg-${this.id}"></p>
+    <form action="" class="comment-form" id="comment-form-${this.id}">
       <textarea
         name="new-comment"
-        maxlength="1000"
-        minlength="1"
+        maxlength="${this.maxTextLength}"
+        minlength="${this.minTextLength}"
         class="comment-form__input"
-        id="comment-input-field"
+        id="comment-input-field-${this.id}"
         form="comment-form"
         placeholder="Введите текст сообщения..."
       ></textarea>
@@ -68,29 +68,110 @@ export class CommentFormComponent implements ICommentForm {
     <button
       type="submit"
       class="button-style-default o-text-18-op-4 submit-button"
-      id="post-comment-btn"
+      id="post-comment-btn-${this.id}"
       form="comment-form"
     >
       Отправить
     </button>
   </div>
 `;
-    parentNode.appendChild(commentFormNode);
-    Services.render(commentFormNode, content);
+    if (parentNode && commentType === "comment") {
+      parentNode.insertBefore(commentFormNode, parentNode.children[2]);
+      DOMHelpsters.renderElement(commentFormNode, content);
+    } else if (parentNode && commentType === "reply")
+      parentNode.insertBefore(commentFormNode, parentNode.firstChild);
+    DOMHelpsters.renderElement(commentFormNode, content);
   }
-  public autoResizeInputfield(): void {
-    this.inputFieldNode.addEventListener(
-      "input",
-      () => {
-        this.inputFieldNode.style.height = "auto";
-        this.inputFieldNode.style.height =
-          this.inputFieldNode.scrollHeight + "px";
-      },
-      false
-    );
+
+  public updateCommentForm(
+    inputFieldNode: HTMLTextAreaElement | null | undefined,
+    textLenDisplayNode: HTMLElement | null | undefined,
+    overlimitMsgNode: HTMLElement | null | undefined,
+    postButton: HTMLButtonElement | null,
+    commentParentNode: HTMLElement | null,
+    commentType: string
+  ) {
+    let hasContent = false;
+    let formHidden:boolean = false;
+
+    if (
+      inputFieldNode &&
+      overlimitMsgNode &&
+      textLenDisplayNode &&
+      postButton &&
+      commentParentNode
+    ) {
+      postButton.disabled = true;
+      inputFieldNode.addEventListener("input", (event: Event) => {
+        if (!!Services.getInputValue(event)) {
+          this.text = Services.getInputValue(event) as string;
+          textLenDisplayNode.textContent = `${this.text.length.toString()}/1000`;
+          overlimitMsgNode.textContent = "";
+          hasContent = true;
+          if (this.text.length === 1000) {
+            postButton.disabled = true;
+            overlimitMsgNode.textContent = "Слишком длинное сообщение";
+          } else if (this.text.trim() === "") {
+            postButton.disabled = true;
+          } else {
+            postButton.disabled = false;
+          }
+        } else {
+          textLenDisplayNode.textContent = "Макс. 1000 символов";
+          overlimitMsgNode.textContent = "";
+          postButton.disabled = true;
+          hasContent = false;
+        }
+      });
+
+      postButton.addEventListener("click", (event: Event) => {
+        event.preventDefault();
+        if (hasContent && commentType === "comment") {
+          this.comment.text = this.text;
+          this.comment.timeStamp = Services.getCurrentTimeStamp();
+          this.comment.createComment(commentParentNode);
+          this.comment.updateComment();
+          hasContent = false;
+          postButton.disabled = true;
+        } else if (hasContent && commentType === "reply") {
+          this.reply.text = this.text;
+          this.reply.timeStamp = Services.getCurrentTimeStamp();
+          this.reply.createReply(commentParentNode);
+          this.comment.updateComment();
+          this.reply.updateReply();
+                    formHidden = true;
+          hasContent = false;
+          postButton.disabled = true;
+
+        }
+        inputFieldNode.value = "";
+        inputFieldNode.style.height = "61px";
+        textLenDisplayNode.textContent = "Макс. 1000 символов";
+      });
+    }
+    this.autoResizeInputfield(inputFieldNode);
+  }
+
+  private autoResizeInputfield(
+    inputFieldNode: HTMLTextAreaElement | null | undefined
+  ): void {
+    if (inputFieldNode) {
+      let offset = inputFieldNode.offsetHeight - inputFieldNode.clientHeight;
+      inputFieldNode.addEventListener(
+        "input",
+        (event: Event) => {
+          inputFieldNode.style.height = "auto";
+          inputFieldNode.style.height =
+            inputFieldNode.scrollHeight + offset + "px";
+          if (!Services.getInputValue(event)) {
+            inputFieldNode.style.height = "61px";
+          }
+        },
+        false
+      );
+    }
   }
 }
-
 
 /*const resultNode = document.querySelector('.container-show-result');
 const btnNode = document.querySelector('.btn-show-result');

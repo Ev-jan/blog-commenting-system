@@ -1,45 +1,42 @@
 import { Services } from "../services/services.js";
+import { DOMHelpsters } from "../services/DOMHelpsters.js";
+import { CommentComponent } from "./Comment.js";
+import { ReplyComponent } from "./Reply.js";
 export class CommentFormComponent {
-    constructor(author, message) {
-        this.inputFieldNode = document.getElementById("comment-input-field");
-        this.postCommentBtn = document.getElementById("post-comment-btn");
-        this.textLenDisplayNode = document.querySelector(".input-char-count-message");
-        this.userNameNode = document.getElementById("comment-form-username");
-        this.overlimitMsgNode = document.getElementById("overlimit-msg");
+    constructor(author, id) {
+        this.minTextLength = 1;
+        this.maxTextLength = 1000;
+        this.text = "";
+        this.avatar = "../public/assets/interface-images/icon-default-avatar.png";
+        this.votes = 0;
+        this.favourite = false;
         this.author = author;
-        this.message = message;
+        this.id = id;
+        this.comment = new CommentComponent(this.author, this.text, this.avatar, this.votes, this.favourite);
+        this.reply = new ReplyComponent(this.author, this.text, this.avatar, this.comment.author);
     }
-    // defining functionality:
-    getInput() { } // get user's message
-    validateInput() { } // make sure that: 1. input is string, (2) not an empty string (3) shorter or equal to 1k characters
-    countInputCharacters() { } // counts characters in textarea and shows how many are available
-    // if number of characters is less than 1k - return current number of characters otherwise return false
-    showOverLimitMessage() { } // shows error message on overlimit
-    postComment() { } // should it belong here or with comment class? must be here
-    putTimeStamp() { } // take this date and show it in a specific HTML element
-    // creating and displaying UI components
-    displayCommentForm(parentNode) {
-        const commentFormNode = document.createElement("div");
-        const content = `<div class="comment-form comment-section__comment-form">
+    createCommentForm(parentNode, commentType) {
+        const commentFormNode = DOMHelpsters.createElement("div");
+        const content = `<div class="comment-form comment-section__comment-form" id="comment-form-${this.id}">
     <div class="avatar comment-section__avatar">
       <img
         class="avatar-image"
-        src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
+        src="${this.avatar}"
         alt="Avatar"
       />
     </div>
     <div class="comment-info-container">
-      <h4 class="username" id="comment-form-username">${this.author}</h4>
-      <p class="input-char-count-message" id="">Макс. 1000 символов</p>
+      <h4 class="username" id="comment-input-field-${this.id}">${this.author}</h4>
+      <p class="input-char-count-message" id="input-char-count-message-${this.id}">Макс. 1000 символов</p>
     </div>
-    <p class="char-overlimit-message" id="overlimit-msg">Слишком длинное сообщение</p>
-    <form action="" class="comment-form" id="comment-form">
+    <p class="char-overlimit-message" id="overlimit-msg-${this.id}"></p>
+    <form action="" class="comment-form" id="comment-form-${this.id}">
       <textarea
         name="new-comment"
-        maxlength="1000"
-        minlength="1"
+        maxlength="${this.maxTextLength}"
+        minlength="${this.minTextLength}"
         class="comment-form__input"
-        id="comment-input-field"
+        id="comment-input-field-${this.id}"
         form="comment-form"
         placeholder="Введите текст сообщения..."
       ></textarea>
@@ -47,22 +44,93 @@ export class CommentFormComponent {
     <button
       type="submit"
       class="button-style-default o-text-18-op-4 submit-button"
-      id="post-comment-btn"
+      id="post-comment-btn-${this.id}"
       form="comment-form"
     >
       Отправить
     </button>
   </div>
 `;
-        parentNode.appendChild(commentFormNode);
-        Services.render(commentFormNode, content);
+        if (parentNode && commentType === "comment") {
+            parentNode.insertBefore(commentFormNode, parentNode.children[2]);
+            DOMHelpsters.renderElement(commentFormNode, content);
+        }
+        else if (parentNode && commentType === "reply")
+            parentNode.insertBefore(commentFormNode, parentNode.firstChild);
+        DOMHelpsters.renderElement(commentFormNode, content);
     }
-    autoResizeInputfield() {
-        this.inputFieldNode.addEventListener("input", () => {
-            this.inputFieldNode.style.height = "auto";
-            this.inputFieldNode.style.height =
-                this.inputFieldNode.scrollHeight + "px";
-        }, false);
+    updateCommentForm(inputFieldNode, textLenDisplayNode, overlimitMsgNode, postButton, commentParentNode, commentType) {
+        let hasContent = false;
+        let formHidden = false;
+        if (inputFieldNode &&
+            overlimitMsgNode &&
+            textLenDisplayNode &&
+            postButton &&
+            commentParentNode) {
+            postButton.disabled = true;
+            inputFieldNode.addEventListener("input", (event) => {
+                if (!!Services.getInputValue(event)) {
+                    this.text = Services.getInputValue(event);
+                    textLenDisplayNode.textContent = `${this.text.length.toString()}/1000`;
+                    overlimitMsgNode.textContent = "";
+                    hasContent = true;
+                    if (this.text.length === 1000) {
+                        postButton.disabled = true;
+                        overlimitMsgNode.textContent = "Слишком длинное сообщение";
+                    }
+                    else if (this.text.trim() === "") {
+                        postButton.disabled = true;
+                    }
+                    else {
+                        postButton.disabled = false;
+                    }
+                }
+                else {
+                    textLenDisplayNode.textContent = "Макс. 1000 символов";
+                    overlimitMsgNode.textContent = "";
+                    postButton.disabled = true;
+                    hasContent = false;
+                }
+            });
+            postButton.addEventListener("click", (event) => {
+                event.preventDefault();
+                if (hasContent && commentType === "comment") {
+                    this.comment.text = this.text;
+                    this.comment.timeStamp = Services.getCurrentTimeStamp();
+                    this.comment.createComment(commentParentNode);
+                    this.comment.updateComment();
+                    hasContent = false;
+                    postButton.disabled = true;
+                }
+                else if (hasContent && commentType === "reply") {
+                    this.reply.text = this.text;
+                    this.reply.timeStamp = Services.getCurrentTimeStamp();
+                    this.reply.createReply(commentParentNode);
+                    this.comment.updateComment();
+                    this.reply.updateReply();
+                    formHidden = true;
+                    hasContent = false;
+                    postButton.disabled = true;
+                }
+                inputFieldNode.value = "";
+                inputFieldNode.style.height = "61px";
+                textLenDisplayNode.textContent = "Макс. 1000 символов";
+            });
+        }
+        this.autoResizeInputfield(inputFieldNode);
+    }
+    autoResizeInputfield(inputFieldNode) {
+        if (inputFieldNode) {
+            let offset = inputFieldNode.offsetHeight - inputFieldNode.clientHeight;
+            inputFieldNode.addEventListener("input", (event) => {
+                inputFieldNode.style.height = "auto";
+                inputFieldNode.style.height =
+                    inputFieldNode.scrollHeight + offset + "px";
+                if (!Services.getInputValue(event)) {
+                    inputFieldNode.style.height = "61px";
+                }
+            }, false);
+        }
     }
 }
 /*const resultNode = document.querySelector('.container-show-result');

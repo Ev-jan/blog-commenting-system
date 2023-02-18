@@ -21,6 +21,16 @@ body {
   min-height: 300vmin;
 }
 
+.o-text-18-op-4 {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-size: 1.8rem;
+  line-height: 2.2rem;
+  color: #000000;
+  opacity: 0.4;
+}
+
 .o-bg-styler {
   display: block;
   content: " ";
@@ -131,7 +141,7 @@ body {
 }
 
 .comment-navigation__icon {
-  margin-left: .5rem;
+  margin-left: 0.5rem;
 }
 
 .drop-down-content {
@@ -256,14 +266,22 @@ body {
   grid-column: 3/4;
   grid-row: 2/3;
   height: 61px;
+  background-color: rgba(171, 216, 115, 1);
+  opacity: 1;
+}
+
+.submit-button:disabled {
+  grid-column: 3/4;
+  grid-row: 2/3;
+  height: 61px;
   background: #a2a2a2;
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .comment-thread {
   padding: 0;
   display: grid;
-  grid-template-columns: auto auto;
-  grid-template-rows: auto auto auto auto;
 }
 
 .thread__item {
@@ -272,8 +290,10 @@ body {
 
 .thread-item_layout {
   display: grid;
+  grid-template-columns: 61px auto;
   column-gap: 2.94%;
   row-gap: 10px;
+  margin-bottom: 3.5rem;
 }
 
 .timestamp {
@@ -297,16 +317,6 @@ body {
   justify-content: start;
   align-items: center;
   column-gap: 2rem;
-}
-
-.o-text-18-op-4 {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 400;
-  font-size: 1.8rem;
-  line-height: 2.2rem;
-  color: #000000;
-  opacity: 0.4;
 }
 
 .replies {
@@ -495,7 +505,7 @@ body {
   }
 
   .avatar-image {
-    height:50px;
+    height: 50px;
     object-fit: contain;
   }
 
@@ -600,10 +610,21 @@ body {
     grid-column: 1/-1;
     grid-row: 3/4;
     height: 50px;
+    background: #abd873;
+    font-size: 1.6rem;
+    line-height: 1.9rem;
+    opacity: 1;
+  }
+
+  .submit-button:disabled {
+    grid-column: 1/-1;
+    grid-row: 3/4;
+    height: 50px;
     background: #a2a2a2;
     font-size: 1.6rem;
     line-height: 1.9rem;
-
+    opacity: 0.4;
+    cursor: not-allowed;
   }
 
   .comment-thread {
@@ -620,6 +641,7 @@ body {
     grid-template-rows: repeat(3 auto);
     column-gap: 2.94%;
     row-gap: 10px;
+    margin-bottom: 3.5rem;
   }
 
   .timestamp {
@@ -690,7 +712,7 @@ body {
   }
 }
 
-@media screen and (max-width: 680px){
+@media screen and (max-width: 680px) {
   .timestamp {
     font-weight: 400;
     font-size: 1.4rem;
