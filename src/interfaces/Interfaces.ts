@@ -8,8 +8,8 @@ export interface IComment {
   author: string,
   timeStamp: string,
   avatar: string,
-  votes?: number | null,
-  favourite?: boolean,
+  votes: number,
+  isAddedTofavourite?: boolean,
   createComment: Function,
   updateComment: Function
 }
@@ -20,8 +20,8 @@ export interface IReply extends IComment {
   author: string,
   timeStamp: string,
   avatar: string,
-  votes?: number | null,
-  favourite?: boolean,
+  votes: number,
+  isAddedTofavourite?: boolean,
   createReply: Function,
   updateReply: Function
 }

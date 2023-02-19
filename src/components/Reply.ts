@@ -6,21 +6,17 @@ import { CommentComponent } from "./Comment.js";
 export class ReplyComponent extends CommentComponent implements IReply {
   id: number = Services.generateId();
   timeStamp: string = Services.getCurrentTimeStamp();
-  votes?: number | null = 0;
-  favourite?: boolean;
+  votes: number = 0;
+  isAddedTofavourite: boolean = false;
   interlocutor: string;
 
-  constructor(  
+  constructor(
     author: string,
     text: string | null,
     avatar: string,
-    interlocutor: string,
-    votes?: number | null,
-    favourite?: boolean,
-
-    
+    interlocutor: string
   ) {
-    super(author, text, avatar, votes, favourite);
+    super(author, text, avatar);
     this.interlocutor = interlocutor;
   }
 
@@ -57,7 +53,7 @@ export class ReplyComponent extends CommentComponent implements IReply {
             >
               <img
                 class="button-icon"
-                src="../public/assets/interface-images/icon-saved.svg"
+                src="../public/assets/interface-images/icon-save-to-fave.svg"
                 alt="reply"
               />
               В избранное
@@ -72,7 +68,7 @@ export class ReplyComponent extends CommentComponent implements IReply {
                   alt="vote down"
                 />
               </button>
-              <div class="btn-rating__count o-text-18-op-4">${this.votes}</div>
+              <div class="btn-rating__count o-text-18-op-4" id="btn-rating__count-${this.id}">${this.votes}</div>
               <button
                 class="btn-rating__icon_upvote button-style-default"
                 id="upvote-${this.id}"
@@ -85,24 +81,28 @@ export class ReplyComponent extends CommentComponent implements IReply {
             </div>
           </div>
       `;
-      parentNode.insertBefore(commentNode, parentNode.firstChild);
-      DOMHelpsters.renderElement(commentNode, content);
-
+    parentNode.insertBefore(commentNode, parentNode.firstChild);
+    DOMHelpsters.renderElement(commentNode, content);
   }
 
-  public updateReply(){
+  public updateReply() {
+    const addToFavouriteBtn = document.getElementById(
+      `btn-fav-${this.id}`
+    ) as HTMLButtonElement;
+    const downVoteBtn = document.getElementById(`downvote-${this.id}`);
+    const upVoteBtn = document.getElementById(`upvote-${this.id}`);
+    const countNode = document.getElementById(
+      `btn-rating__count-${this.id}`
+    ) as HTMLDivElement;
+    if (downVoteBtn && upVoteBtn && countNode) {
+      downVoteBtn.addEventListener("click", () => {
+        this.countVotes("down", countNode);
+      });
+      upVoteBtn.addEventListener("click", () => {
+        this.countVotes("up", countNode);
+      });
+    }
 
-  }
-
-  public reply():void {}
-  /**
-   * voteCount
-   */
-  public voteCount():void {
-    
-  }
-
-  public addToFavorite(){
-
+    this.addToFavourite(addToFavouriteBtn, this.isAddedTofavourite);
   }
 }

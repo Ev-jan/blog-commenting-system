@@ -7,8 +7,8 @@ import { ReplyComponent } from "./Reply.js";
 export class CommentFormComponent implements ICommentForm {
   author: string;
   private minTextLength: number = 1;
-  private maxTextLength: number = 1000;
-  id: number;
+  private maxTextLength: number = 1001;
+  id: number = Services.generateId();
   private text: string | null = "";
   private avatar: string =
     "../public/assets/interface-images/icon-default-avatar.png";
@@ -17,17 +17,10 @@ export class CommentFormComponent implements ICommentForm {
   comment: IComment;
   reply: IReply;
 
-
   constructor(author: string, id: number) {
     this.author = author;
     this.id = id;
-    this.comment = new CommentComponent(
-      this.author,
-      this.text,
-      this.avatar,
-      this.votes,
-      this.favourite
-    );
+    this.comment = new CommentComponent(this.author, this.text, this.avatar);
     this.reply = new ReplyComponent(
       this.author,
       this.text,
@@ -92,7 +85,6 @@ export class CommentFormComponent implements ICommentForm {
     commentType: string
   ) {
     let hasContent = false;
-    let formHidden:boolean = false;
 
     if (
       inputFieldNode &&
@@ -108,7 +100,7 @@ export class CommentFormComponent implements ICommentForm {
           textLenDisplayNode.textContent = `${this.text.length.toString()}/1000`;
           overlimitMsgNode.textContent = "";
           hasContent = true;
-          if (this.text.length === 1000) {
+          if (this.text.length > 1000) {
             postButton.disabled = true;
             overlimitMsgNode.textContent = "Слишком длинное сообщение";
           } else if (this.text.trim() === "") {
@@ -124,25 +116,26 @@ export class CommentFormComponent implements ICommentForm {
         }
       });
 
+// logic of posting comments and replying to comments
+
       postButton.addEventListener("click", (event: Event) => {
         event.preventDefault();
         if (hasContent && commentType === "comment") {
-          this.comment.text = this.text;
-          this.comment.timeStamp = Services.getCurrentTimeStamp();
-          this.comment.createComment(commentParentNode);
-          this.comment.updateComment();
+          const newComment = new CommentComponent(this.author, this.text, this.avatar);
+          newComment.text = this.text;
+          newComment.timeStamp = Services.getCurrentTimeStamp();
+          newComment.createComment(commentParentNode);
+          newComment.updateComment();
           hasContent = false;
           postButton.disabled = true;
         } else if (hasContent && commentType === "reply") {
-          this.reply.text = this.text;
-          this.reply.timeStamp = Services.getCurrentTimeStamp();
-          this.reply.createReply(commentParentNode);
-          this.comment.updateComment();
-          this.reply.updateReply();
-                    formHidden = true;
+          const newReply = new ReplyComponent(this.author, this.text, this.avatar, this.comment.author);
+          newReply.text = this.text;
+          newReply.timeStamp = Services.getCurrentTimeStamp();
+          newReply.createReply(commentParentNode);
+          newReply.updateReply();
           hasContent = false;
           postButton.disabled = true;
-
         }
         inputFieldNode.value = "";
         inputFieldNode.style.height = "61px";

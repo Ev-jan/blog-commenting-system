@@ -2,11 +2,12 @@ import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentComponent } from "./Comment.js";
 export class ReplyComponent extends CommentComponent {
-    constructor(author, text, avatar, interlocutor, votes, favourite) {
-        super(author, text, avatar, votes, favourite);
+    constructor(author, text, avatar, interlocutor) {
+        super(author, text, avatar);
         this.id = Services.generateId();
         this.timeStamp = Services.getCurrentTimeStamp();
         this.votes = 0;
+        this.isAddedTofavourite = false;
         this.interlocutor = interlocutor;
     }
     createReply(parentNode) {
@@ -42,7 +43,7 @@ export class ReplyComponent extends CommentComponent {
             >
               <img
                 class="button-icon"
-                src="../public/assets/interface-images/icon-saved.svg"
+                src="../public/assets/interface-images/icon-save-to-fave.svg"
                 alt="reply"
               />
               В избранное
@@ -57,7 +58,7 @@ export class ReplyComponent extends CommentComponent {
                   alt="vote down"
                 />
               </button>
-              <div class="btn-rating__count o-text-18-op-4">${this.votes}</div>
+              <div class="btn-rating__count o-text-18-op-4" id="btn-rating__count-${this.id}">${this.votes}</div>
               <button
                 class="btn-rating__icon_upvote button-style-default"
                 id="upvote-${this.id}"
@@ -74,13 +75,18 @@ export class ReplyComponent extends CommentComponent {
         DOMHelpsters.renderElement(commentNode, content);
     }
     updateReply() {
-    }
-    reply() { }
-    /**
-     * voteCount
-     */
-    voteCount() {
-    }
-    addToFavorite() {
+        const addToFavouriteBtn = document.getElementById(`btn-fav-${this.id}`);
+        const downVoteBtn = document.getElementById(`downvote-${this.id}`);
+        const upVoteBtn = document.getElementById(`upvote-${this.id}`);
+        const countNode = document.getElementById(`btn-rating__count-${this.id}`);
+        if (downVoteBtn && upVoteBtn && countNode) {
+            downVoteBtn.addEventListener("click", () => {
+                this.countVotes("down", countNode);
+            });
+            upVoteBtn.addEventListener("click", () => {
+                this.countVotes("up", countNode);
+            });
+        }
+        this.addToFavourite(addToFavouriteBtn, this.isAddedTofavourite);
     }
 }

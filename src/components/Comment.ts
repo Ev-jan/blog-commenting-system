@@ -9,22 +9,14 @@ export class CommentComponent implements IComment {
   author: string;
   timeStamp: string = Services.getCurrentTimeStamp();
   avatar: string;
-  votes?: number | null;
-  favourite?: boolean;
+  votes: number = 0;
+  isAddedTofavourite: boolean = false;
   formIsHidden: boolean = false;
 
-  constructor(
-    author: string,
-    text: string | null,
-    avatar: string,
-    votes?: number | null,
-    favourite?: boolean
-  ) {
+  constructor(author: string, text: string | null, avatar: string) {
     this.author = author;
     this.text = text;
     this.avatar = avatar;
-    this.votes = votes;
-    this.favourite = favourite;
   }
 
   public createComment(parentNode: HTMLElement): void {
@@ -32,6 +24,7 @@ export class CommentComponent implements IComment {
       "thread__item",
       "thread-item_layout",
     ]);
+
     const content: string = `
       <div class="avatar">
         <img
@@ -63,7 +56,7 @@ export class CommentComponent implements IComment {
         >
           <img
             class="button-icon"
-            src="../public/assets/interface-images/icon-saved.svg"
+            src="../public/assets/interface-images/icon-save-to-fave.svg"
             alt="add to favourite"
           />
           В избранное
@@ -78,7 +71,7 @@ export class CommentComponent implements IComment {
               alt="vote down"
             />
           </button>
-          <div class="btn-rating__count o-text-18-op-4">${this.votes}</div>
+          <div class="btn-rating__count o-text-18-op-4" id="btn-rating__count-${this.id}">${this.votes}</div>
           <button
             class="btn-rating__icon_upvote button-style-default"
             id="upvote-${this.id}"
@@ -99,6 +92,36 @@ export class CommentComponent implements IComment {
   }
 
   public updateComment() {
+    // upvoting/downvoting comments
+
+    const downVoteBtn = document.getElementById(
+      `downvote-${this.id}`
+    ) as HTMLButtonElement;
+    const upVoteBtn = document.getElementById(
+      `upvote-${this.id}`
+    ) as HTMLButtonElement;
+    const countNode = document.getElementById(
+      `btn-rating__count-${this.id}`
+    ) as HTMLDivElement;
+    const addToFavouriteBtn = document.getElementById(
+      `btn-favourite-${this.id}`
+    ) as HTMLButtonElement;
+
+    if (downVoteBtn && upVoteBtn && countNode) {
+      downVoteBtn.addEventListener("click", (event: Event) => {
+        this.countVotes("down", countNode);
+      });
+      upVoteBtn.addEventListener("click", (event: Event) => {
+        this.countVotes("up", countNode);
+      });
+    } else throw new Error("voting elements not found");
+
+    // adding to /removing from favourites
+
+    this.addToFavourite(addToFavouriteBtn, this.isAddedTofavourite);
+
+    // posting replies
+
     const replyBtn = document.getElementById(
       `btn-reply-${this.id}`
     ) as HTMLButtonElement | null;
@@ -112,7 +135,6 @@ export class CommentComponent implements IComment {
             `comment-input-field-${this.id}`,
             "comment-form__input"
           ) as HTMLTextAreaElement;
-
           const textLenDisplayNode = DOMHelpsters.getElementOOClass(
             `input-char-count-message-${this.id}`,
             "input-char-count-message"
@@ -126,10 +148,12 @@ export class CommentComponent implements IComment {
             "button-style-default o-text-18-op-4 submit-button"
           ) as HTMLButtonElement | null;
 
+          // adding event listener to reply button to hide input field when clicking this button
+
           postButton?.addEventListener("click", (event: Event) => {
             DOMHelpsters.deletElementById(`comment-form-${this.id}`);
             this.formIsHidden = false;
-          })
+          });
 
           replyForm.updateCommentForm(
             inputNode,
@@ -149,5 +173,43 @@ export class CommentComponent implements IComment {
       replyBtn.addEventListener("click", toggleInput, false);
       this.formIsHidden = false;
     }
+  }
+
+  public countVotes(vote: "up" | "down", countNode: HTMLDivElement): void {
+    if (vote === "up") {
+      this.votes++;
+    } else if (vote === "down") {
+      this.votes--;
+    }
+    if (this.votes < 0) {
+      countNode.style.color = "rgba(255, 0, 0, 1)";
+    } else if (this.votes > 0) {
+      countNode.style.color = "rgba(138, 197, 64, 1)";
+    } else {
+      countNode.style.color = "rgba(0, 0, 0, 1)";
+    }
+    countNode.textContent = `${this.votes}`;
+  }
+
+  public addToFavourite(addToFavouriteBtn: HTMLButtonElement, isAddedTofavourite: boolean) {
+    if (addToFavouriteBtn) {
+      addToFavouriteBtn.addEventListener("click", () => {
+        if (isAddedTofavourite === false) {
+          addToFavouriteBtn.innerHTML = `<img class="button-icon"
+                                        src="../public/assets/interface-images/icon-saved.svg"
+                                        alt="add to favourite"
+                                        />
+                                        В избранном`;
+          isAddedTofavourite = true;
+        } else {
+          addToFavouriteBtn.innerHTML = `<img class="button-icon"
+                                        src="../public/assets/interface-images/icon-save-to-fave.svg"
+                                        alt="add to favourite"
+                                        />
+                                        В избранное`;
+          isAddedTofavourite = false;
+        }
+      });
+    } else throw new Error("addToFavouriteBtn not found");
   }
 }

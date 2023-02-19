@@ -31,22 +31,22 @@
                 >(0)</span
               >
             </div>
-            <div class="drop-down-btn comment-navigation__item">
-              Текст
-              <img
-                class="comment-navigation__icon"
-                src="../public/assets/interface-images/arrow-drop-down.svg"
-                alt="dropdown menu"
-              />
-            </div>
-            <div class="drop-down-content">
-              <ul class="drop-down-menu">
-                <li class="drop-down-menu__item">По дате</li>
-                <li class="drop-down-menu__item">По количеству оценок</li>
-                <li class="drop-down-menu__item">По актуальности</li>
-                <li class="drop-down-menu__item">По количеству ответов</li>
-              </ul>
-            </div>
+            <div class="drop-down-menu">
+              <div class="drop-down-btn comment-navigation__item">
+                По количеству оценок
+                <img
+                  class="comment-navigation__icon"
+                  src="../public/assets/interface-images/arrow-drop-down.svg"
+                  alt="dropdown menu"
+                />
+              </div>
+                <ul class="drop-down-content">
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По дате</button></li>
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По количеству оценок</button></li>
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По актуальности</button></li>
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По количеству ответов</button></li>
+                </ul>
+            </div>  
             <div class="comment-navigation__item" id="comment-nav-sort-fav">
               Избранное
               <img
@@ -59,6 +59,7 @@
           <ul class="comment-thread">
           </ul>
         </div>
+        <div class="drop-down-menu"></div>
       </main>
     </div>
     <footer></footer>
