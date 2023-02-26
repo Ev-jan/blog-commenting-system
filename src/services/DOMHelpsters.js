@@ -18,10 +18,6 @@ export class DOMHelpsters {
         const arrayOfElements = [...nodes];
         return arrayOfElements;
     }
-    static appendElement(parent, child) {
-        parent.appendChild(child);
-    }
-    ;
     static renderElement(element, content) {
         if (element) {
             element.innerHTML = content;

@@ -2,13 +2,48 @@ import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentComponent } from "./Comment.js";
 export class ReplyComponent extends CommentComponent {
-    constructor(author, text, avatar, interlocutor) {
-        super(author, text, avatar);
+    constructor(currentUser, avatar, timeStamp, text, id, votes, isAddedTofavourite, storedUser, storedAvatar) {
+        super(currentUser, avatar, timeStamp, text, id, votes, isAddedTofavourite, storedUser, storedAvatar);
+        // id: number = Services.generateId();
+        // currentUser: string = "";
+        // avatar: string = "";
+        // timeStamp: string  = Services.getCurrentTimeStamp();
+        // text: string  = "";
+        // votes: number = 0;
+        // isAddedTofavourite: boolean = false;
+        // interlocutor: string = "";
         this.id = Services.generateId();
         this.timeStamp = Services.getCurrentTimeStamp();
+        this.text = "";
         this.votes = 0;
         this.isAddedTofavourite = false;
-        this.interlocutor = interlocutor;
+        this.currentUser = currentUser;
+        this.avatar = avatar;
+        if (timeStamp !== undefined) {
+            this.timeStamp = timeStamp;
+        }
+        if (text !== undefined) {
+            this.text = text;
+        }
+        if (id !== undefined) {
+            this.id = id;
+        }
+        if (votes !== undefined) {
+            this.votes = votes;
+        }
+        if (isAddedTofavourite !== undefined) {
+            this.isAddedTofavourite = isAddedTofavourite;
+        }
+        if (storedUser !== undefined) {
+            this.storedUser = storedUser;
+        }
+        else
+            this.storedUser = this.currentUser;
+        if (storedAvatar !== undefined) {
+            this.storedAvatar = storedAvatar;
+        }
+        else
+            this.storedAvatar = this.avatar;
     }
     createReply(parentNode) {
         const commentNode = DOMHelpsters.createElement("li", [
@@ -19,15 +54,16 @@ export class ReplyComponent extends CommentComponent {
         <div class="avatar">
           <img
             class="avatar-image"
-            src="../public/assets/content-images/samsung-memory-hjRC0i0oJxg-unsplash 1avatar-pic.png"
+            id="reply-avatar-${this.id}"
+            src="${this.avatar}"
             alt="Avatar"
           />
         </div>
         <div class="comment-info-container">
-          <h4 class="username">${this.author}</h4>
+          <h4 class="username" id="username-${this.id}">${this.currentUser}</h4>
           <div class="replied-user-info o-text-18-op-4">
             <img class="replied-user-info__icon" src="../public/assets/interface-images/icon-reply.svg" alt="Replied to">
-            <div class="replied-user-info__text">${this.interlocutor}</div>
+            <div class="replied-user-info__text" id="replied-user-name-${this.id}">${this.storedUser}</div>
           </div>
           <time datetime="13:55 01-15" class="timestamp"
             >${this.timeStamp}</time

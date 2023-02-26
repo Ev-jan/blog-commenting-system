@@ -2,15 +2,36 @@ import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentFormComponent } from "./CommentForm.js";
 export class CommentComponent {
-    constructor(author, text, avatar) {
+    constructor(currentUser, avatar, timeStamp, text, id, votes, isAddedTofavourite, storedUser = currentUser, storedAvatar = avatar) {
+        this.formIsHidden = false;
         this.id = Services.generateId();
         this.timeStamp = Services.getCurrentTimeStamp();
+        this.text = "";
         this.votes = 0;
         this.isAddedTofavourite = false;
-        this.formIsHidden = false;
-        this.author = author;
-        this.text = text;
+        this.currentUser = currentUser;
         this.avatar = avatar;
+        if (timeStamp !== undefined) {
+            this.timeStamp = timeStamp;
+        }
+        if (text !== undefined) {
+            this.text = text;
+        }
+        if (id !== undefined) {
+            this.id = id;
+        }
+        if (votes !== undefined) {
+            this.votes = votes;
+        }
+        if (isAddedTofavourite !== undefined) {
+            this.isAddedTofavourite = isAddedTofavourite;
+        }
+        if (storedUser !== undefined) {
+            this.storedUser = storedUser;
+        }
+        if (storedAvatar !== undefined) {
+            this.storedAvatar = storedAvatar;
+        }
     }
     createComment(parentNode) {
         const commentNode = DOMHelpsters.createElement("li", [
@@ -21,12 +42,13 @@ export class CommentComponent {
       <div class="avatar">
         <img
           class="avatar-image"
-          src="${this.avatar}"
+          id="comment-avatar-image-${this.id}"
+          src="${this.storedAvatar}"
           alt="Avatar"
         />
       </div>
       <div class="comment-info-container">
-        <h4 class="username">${this.author}</h4>
+        <h4 class="username" id="comment-username-${this.id}">${this.storedUser}</h4>
         <time datetime="13:55 01-15" class="timestamp"
           >${this.timeStamp}</time
         >
@@ -82,12 +104,20 @@ export class CommentComponent {
         DOMHelpsters.renderElement(commentNode, content);
     }
     updateComment() {
-        // upvoting/downvoting comments
+        // upvote / downvote comments
+        const userAvatarNode = document.getElementById(`comment-avatar-image-${this.id}`);
+        const userNameNode = document.getElementById(`comment-username-${this.id}`);
         const downVoteBtn = document.getElementById(`downvote-${this.id}`);
         const upVoteBtn = document.getElementById(`upvote-${this.id}`);
         const countNode = document.getElementById(`btn-rating__count-${this.id}`);
         const addToFavouriteBtn = document.getElementById(`btn-favourite-${this.id}`);
-        if (downVoteBtn && upVoteBtn && countNode) {
+        if (downVoteBtn &&
+            upVoteBtn &&
+            countNode &&
+            userNameNode &&
+            userAvatarNode) {
+            userAvatarNode.setAttribute("src", `${this.storedAvatar}`);
+            userNameNode.innerText = `${this.storedUser}`;
             downVoteBtn.addEventListener("click", (event) => {
                 this.countVotes("down", countNode);
             });
@@ -97,13 +127,13 @@ export class CommentComponent {
         }
         else
             throw new Error("voting elements not found");
-        // adding to /removing from favourites
+        // add to and remove from favourites
         this.addToFavourite(addToFavouriteBtn, this.isAddedTofavourite);
-        // posting replies
+        // post replies
         const replyBtn = document.getElementById(`btn-reply-${this.id}`);
         const commentFormParentNode = document.getElementById(`replies-${this.id}`);
         if (replyBtn && commentFormParentNode) {
-            const replyForm = new CommentFormComponent(this.author, this.id);
+            const replyForm = new CommentFormComponent(this.id, this.currentUser, this.avatar);
             const toggleInput = (event) => {
                 if (this.formIsHidden === false) {
                     replyForm.createCommentForm(commentFormParentNode, "reply");
@@ -111,17 +141,19 @@ export class CommentComponent {
                     const textLenDisplayNode = DOMHelpsters.getElementOOClass(`input-char-count-message-${this.id}`, "input-char-count-message");
                     const overlimitMsgNode = DOMHelpsters.getElementOOClass(`overlimit-msg-${this.id}`, "char-overlimit-message");
                     const postButton = DOMHelpsters.getElementOOClass(`post-comment-btn-${this.id}`, "button-style-default o-text-18-op-4 submit-button");
+                    const userAvatarNode = document.getElementById(`avatar-image-${this.id}`);
+                    const userNameNode = document.getElementById(`username-${this.id}`);
                     // adding event listener to reply button to hide input field when clicking this button
                     postButton === null || postButton === void 0 ? void 0 : postButton.addEventListener("click", (event) => {
                         DOMHelpsters.deletElementById(`comment-form-${this.id}`);
                         this.formIsHidden = false;
                     });
-                    replyForm.updateCommentForm(inputNode, textLenDisplayNode, overlimitMsgNode, postButton, commentFormParentNode, "reply");
+                    replyForm.updateCommentForm(inputNode, textLenDisplayNode, overlimitMsgNode, postButton, commentFormParentNode, userAvatarNode, userNameNode, "reply", this.storedUser, this.storedAvatar);
                     this.formIsHidden = true;
                 }
                 else {
                     this.formIsHidden = false;
-                    DOMHelpsters.deletElementById(`comment-form-${this.id}`);
+                    DOMHelpsters.deletElementById(`comment-form-${this.id}`); // changed ID here
                 }
             };
             replyBtn.addEventListener("click", toggleInput, false);

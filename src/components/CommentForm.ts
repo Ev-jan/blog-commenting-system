@@ -1,32 +1,33 @@
-import { IComment, ICommentForm, IReply } from "../interfaces/Interfaces.js";
+// import { IComment, ICommentForm, IReply } from "../interfaces/Interfaces.js";
 import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentComponent } from "./Comment.js";
 import { ReplyComponent } from "./Reply.js";
+import { CommentThread } from "../services/CommentThread.js";
 
-export class CommentFormComponent implements ICommentForm {
-  author: string;
+export class CommentFormComponent {
   private minTextLength: number = 1;
   private maxTextLength: number = 1001;
-  id: number = Services.generateId();
-  private text: string | null = "";
-  private avatar: string =
-    "../public/assets/interface-images/icon-default-avatar.png";
-  votes: number = 0;
-  favourite: boolean = false;
-  comment: IComment;
-  reply: IReply;
+  id: number;
+  currentUser: string = "";
+  avatar: string = "../public/assets/interface-images/icon-default-avatar.png";
+  text: string = "";
+  comment: CommentComponent;
+  reply: ReplyComponent;
 
-  constructor(author: string, id: number) {
-    this.author = author;
+  constructor(id: number, currentUser?: string, avatar?: string, text?: string) {
     this.id = id;
-    this.comment = new CommentComponent(this.author, this.text, this.avatar);
-    this.reply = new ReplyComponent(
-      this.author,
-      this.text,
-      this.avatar,
-      this.comment.author
-    );
+    if (currentUser !== undefined) {
+      this.currentUser = currentUser;
+    }
+    if (text !== undefined) {
+      this.text = text;
+    }
+    if (avatar !== undefined) {
+      this.avatar = avatar;
+    }
+    this.comment = new CommentComponent(this.currentUser, this.avatar);
+    this.reply = new ReplyComponent(this.currentUser, this.avatar);
   }
 
   public createCommentForm(
@@ -38,12 +39,13 @@ export class CommentFormComponent implements ICommentForm {
     <div class="avatar comment-section__avatar">
       <img
         class="avatar-image"
+        id="avatar-image-${this.id}"
         src="${this.avatar}"
         alt="Avatar"
       />
     </div>
     <div class="comment-info-container">
-      <h4 class="username" id="comment-input-field-${this.id}">${this.author}</h4>
+      <h4 class="username" id="username-${this.id}">${this.currentUser}</h4>
       <p class="input-char-count-message" id="input-char-count-message-${this.id}">Макс. 1000 символов</p>
     </div>
     <p class="char-overlimit-message" id="overlimit-msg-${this.id}"></p>
@@ -82,10 +84,22 @@ export class CommentFormComponent implements ICommentForm {
     overlimitMsgNode: HTMLElement | null | undefined,
     postButton: HTMLButtonElement | null,
     commentParentNode: HTMLElement | null,
-    commentType: string
+    userAvatarNode: HTMLElement | null,
+    userNameNode: HTMLElement | null,
+    commentType: string,
+    userFromStorage?: string,
+    avatarFromStorage?: string
   ) {
     let hasContent = false;
 
+// display current user's name and avatar on the input form
+
+    if (userAvatarNode && userNameNode) {
+      // this.currentUser = username;
+      // this.avatar = avatar;
+      userAvatarNode.setAttribute("src", `${this.avatar}`);
+      userNameNode.innerText = `${this.currentUser}`;
+    }
     if (
       inputFieldNode &&
       overlimitMsgNode &&
@@ -116,24 +130,54 @@ export class CommentFormComponent implements ICommentForm {
         }
       });
 
-// logic of posting comments and replying to comments
+      // Post comments and replies
 
       postButton.addEventListener("click", (event: Event) => {
         event.preventDefault();
         if (hasContent && commentType === "comment") {
-          const newComment = new CommentComponent(this.author, this.text, this.avatar);
-          newComment.text = this.text;
-          newComment.timeStamp = Services.getCurrentTimeStamp();
-          newComment.createComment(commentParentNode);
-          newComment.updateComment();
+          this.comment.id = Services.generateId();
+          this.comment.timeStamp = Services.getCurrentTimeStamp();
+          this.comment.currentUser = this.currentUser;
+          this.comment.avatar = this.avatar;
+          this.comment.text = this.text;
+          this.comment.createComment(commentParentNode);
+          const storedComment = new CommentThread();
+          storedComment.storeMessage(
+            this.comment.id,
+            this.comment.currentUser,
+            this.comment.avatar,
+            this.comment.timeStamp,
+            this.comment.text,
+            this.comment.votes,
+            this.comment.isAddedTofavourite,
+          );
+          this.comment.updateComment();
           hasContent = false;
           postButton.disabled = true;
         } else if (hasContent && commentType === "reply") {
-          const newReply = new ReplyComponent(this.author, this.text, this.avatar, this.comment.author);
-          newReply.text = this.text;
-          newReply.timeStamp = Services.getCurrentTimeStamp();
-          newReply.createReply(commentParentNode);
-          newReply.updateReply();
+          this.reply.id = Services.generateId();
+          this.reply.timeStamp = Services.getCurrentTimeStamp();
+          this.reply.currentUser = this.currentUser;
+          this.reply.avatar = this.avatar;
+          this.reply.text = this.text;
+
+          // store new reply in localStorage
+          const storedReply = new CommentThread();
+          storedReply.storeMessage(
+            this.reply.id,
+            userFromStorage as string,
+            avatarFromStorage as string,
+            this.reply.timeStamp,
+            this.reply.text,
+            this.reply.votes,
+            this.reply.isAddedTofavourite,
+            this.reply.currentUser,
+            this.reply.avatar,
+            this.id
+          );
+          this.reply.createReply(commentParentNode);
+
+          this.reply.updateReply();
           hasContent = false;
           postButton.disabled = true;
         }
@@ -165,52 +209,3 @@ export class CommentFormComponent implements ICommentForm {
     }
   }
 }
-
-/*const resultNode = document.querySelector('.container-show-result');
-const btnNode = document.querySelector('.btn-show-result');
-let userInput = document.querySelectorAll('.input');
-let userValues = [];
-
-userInput.forEach(item => {
-    item.addEventListener('input', event => {
-        getUserValue();
-        processUserValues();
-    })
-})
-
-function processUserValues(a = userValues) {
-    if (a.some((value) => { return value < 100 || value > 300; })) {
-        document.querySelector('.container-show-result').innerHTML = `One of the numbers is out of range from 100 to 300. <br> Enter a valid number`;
-        btnNode.style.display = 'none';
-    }
-    else {
-        document.querySelector('.container-show-result').innerHTML = `Press Get`;
-        btnNode.style.display = 'flex';
-    }
-};
-
-function getUserValue() {
-    userValues = [+userInput[0].value, +userInput[1].value];
-    return userValues;
-};
-
-function displayResult(data) {
-    let url = URL.createObjectURL(data);
-    let image = `
-    <img 
-    src="${url}";
-    class="image"/>`;
-    resultNode.innerHTML = image;
-}
-
-btnNode.addEventListener('click', () => {
-    fetch(`https://picsum.photos/${userValues[0]}/${userValues[1]}`)
-        .then((response) => {
-            const result = response.blob();
-            return result;
-        })
-        .then((data) => {
-            displayResult(data);
-        })
-        .catch(() => { console.log('error') });
-});*/

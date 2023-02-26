@@ -20,21 +20,14 @@ export class Services {
     const hours = String(currentDate.getHours()).padStart(2, '0');
     const minutes = String(currentDate.getMinutes()).padStart(2, '0');
       return `${day}.${month} ${hours}:${minutes}`;
-    
-
   }
 
-
-  static createUserProfile() {}
-  // function to be shared amongst multiple entities:
-  // 1. CommentForm: checks if user is logged in or not. If yes, takes his nickname from cash, otherwise - runs its default scenario.
-  // 2. comment: posted comment should run this check to ensure that:
-  //    a user can  vote down or up only once
-  static checkCash() {}
 
   static currentId: number = 0;
 
   static generateId(): number {
     return ++this.currentId;
   }
+
+
 }

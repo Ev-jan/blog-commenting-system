@@ -35,10 +35,6 @@ export class DOMHelpsters {
     return element;
   };
 
-  static appendElement(parent: HTMLElement, child: HTMLElement): void {
-    parent.appendChild(child);
-  };
-
   static renderElement(element: HTMLElement | null, content: string) {
     
     if (element) {

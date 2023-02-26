@@ -1,22 +1,64 @@
-import { IComment, ICommentForm } from "../interfaces/Interfaces.js";
 import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentFormComponent } from "./CommentForm.js";
+import { CommentThread } from "../services/CommentThread.js";
+import { User } from "./User.js";
 
-export class CommentComponent implements IComment {
+export class CommentComponent {
+  private formIsHidden: boolean = false;
   id: number = Services.generateId();
-  text: string | null;
-  author: string;
-  timeStamp: string = Services.getCurrentTimeStamp();
+  currentUser: string;
   avatar: string;
+  timeStamp: string = Services.getCurrentTimeStamp();
+  text: string = "";
   votes: number = 0;
   isAddedTofavourite: boolean = false;
-  formIsHidden: boolean = false;
+  storedUser?: string;
+  storedAvatar?: string;
 
-  constructor(author: string, text: string | null, avatar: string) {
-    this.author = author;
-    this.text = text;
-    this.avatar = avatar;
+  constructor(
+    currentUser: string,
+    avatar: string,
+    timeStamp?: string,
+    text?: string,
+    id?: number,
+    votes?: number,
+    isAddedTofavourite?: boolean,
+    storedUser: string = currentUser,
+    storedAvatar: string = avatar
+
+  ) {
+      this.currentUser = currentUser;
+      this.avatar = avatar;
+
+      if(timeStamp !== undefined){
+        this.timeStamp = timeStamp;
+      }
+      
+      if(text !== undefined){
+        this.text = text;
+      }
+
+      if(id !== undefined){
+        this.id = id;
+      }
+
+      if(votes !== undefined){
+        this.votes = votes;
+      }
+
+      if(isAddedTofavourite !== undefined){
+        this.isAddedTofavourite = isAddedTofavourite;
+      }
+
+      if(storedUser !== undefined){
+        this.storedUser = storedUser;
+      }
+
+      if(storedAvatar !== undefined){
+        this.storedAvatar = storedAvatar; 
+      }
+
   }
 
   public createComment(parentNode: HTMLElement): void {
@@ -29,12 +71,13 @@ export class CommentComponent implements IComment {
       <div class="avatar">
         <img
           class="avatar-image"
-          src="${this.avatar}"
+          id="comment-avatar-image-${this.id}"
+          src="${this.storedAvatar}"
           alt="Avatar"
         />
       </div>
       <div class="comment-info-container">
-        <h4 class="username">${this.author}</h4>
+        <h4 class="username" id="comment-username-${this.id}">${this.storedUser}</h4>
         <time datetime="13:55 01-15" class="timestamp"
           >${this.timeStamp}</time
         >
@@ -92,8 +135,14 @@ export class CommentComponent implements IComment {
   }
 
   public updateComment() {
-    // upvoting/downvoting comments
 
+    
+    // upvote / downvote comments
+
+    const userAvatarNode = document.getElementById(
+      `comment-avatar-image-${this.id}`
+    ) as HTMLImageElement;
+    const userNameNode = document.getElementById(`comment-username-${this.id}`);
     const downVoteBtn = document.getElementById(
       `downvote-${this.id}`
     ) as HTMLButtonElement;
@@ -107,7 +156,15 @@ export class CommentComponent implements IComment {
       `btn-favourite-${this.id}`
     ) as HTMLButtonElement;
 
-    if (downVoteBtn && upVoteBtn && countNode) {
+    if (
+      downVoteBtn &&
+      upVoteBtn &&
+      countNode &&
+      userNameNode &&
+      userAvatarNode )
+{
+      userAvatarNode.setAttribute("src", `${this.storedAvatar}`);
+      userNameNode.innerText = `${this.storedUser}`;
       downVoteBtn.addEventListener("click", (event: Event) => {
         this.countVotes("down", countNode);
       });
@@ -116,42 +173,47 @@ export class CommentComponent implements IComment {
       });
     } else throw new Error("voting elements not found");
 
-    // adding to /removing from favourites
+    // add to and remove from favourites
 
     this.addToFavourite(addToFavouriteBtn, this.isAddedTofavourite);
 
-    // posting replies
+    // post replies
 
     const replyBtn = document.getElementById(
       `btn-reply-${this.id}`
     ) as HTMLButtonElement | null;
     const commentFormParentNode = document.getElementById(`replies-${this.id}`);
     if (replyBtn && commentFormParentNode) {
-      const replyForm = new CommentFormComponent(this.author, this.id);
+      const replyForm = new CommentFormComponent(this.id, this.currentUser, this.avatar,); 
       const toggleInput = (event: Event) => {
         if (this.formIsHidden === false) {
           replyForm.createCommentForm(commentFormParentNode, "reply");
           const inputNode = DOMHelpsters.getElementOOClass(
-            `comment-input-field-${this.id}`,
+            `comment-input-field-${this.id}`,                                              
             "comment-form__input"
           ) as HTMLTextAreaElement;
           const textLenDisplayNode = DOMHelpsters.getElementOOClass(
-            `input-char-count-message-${this.id}`,
+            `input-char-count-message-${this.id}`,                                        
             "input-char-count-message"
           );
           const overlimitMsgNode = DOMHelpsters.getElementOOClass(
-            `overlimit-msg-${this.id}`,
+            `overlimit-msg-${this.id}`,                                               
             "char-overlimit-message"
           );
           const postButton = DOMHelpsters.getElementOOClass(
-            `post-comment-btn-${this.id}`,
+            `post-comment-btn-${this.id}`,                                                 
             "button-style-default o-text-18-op-4 submit-button"
           ) as HTMLButtonElement | null;
+
+          const userAvatarNode = document.getElementById(
+            `avatar-image-${this.id}`                                                         
+          ) as HTMLImageElement;
+          const userNameNode = document.getElementById(`username-${this.id}`);               
 
           // adding event listener to reply button to hide input field when clicking this button
 
           postButton?.addEventListener("click", (event: Event) => {
-            DOMHelpsters.deletElementById(`comment-form-${this.id}`);
+            DOMHelpsters.deletElementById(`comment-form-${this.id}`);                         
             this.formIsHidden = false;
           });
 
@@ -161,18 +223,24 @@ export class CommentComponent implements IComment {
             overlimitMsgNode,
             postButton,
             commentFormParentNode,
-            "reply"
+            userAvatarNode,
+            userNameNode,
+            "reply",
+            this.storedUser, 
+            this.storedAvatar
           );
 
           this.formIsHidden = true;
         } else {
           this.formIsHidden = false;
-          DOMHelpsters.deletElementById(`comment-form-${this.id}`);
+          DOMHelpsters.deletElementById(`comment-form-${this.id}`);                         // changed ID here
         }
       };
       replyBtn.addEventListener("click", toggleInput, false);
       this.formIsHidden = false;
     }
+
+
   }
 
   public countVotes(vote: "up" | "down", countNode: HTMLDivElement): void {
@@ -191,7 +259,10 @@ export class CommentComponent implements IComment {
     countNode.textContent = `${this.votes}`;
   }
 
-  public addToFavourite(addToFavouriteBtn: HTMLButtonElement, isAddedTofavourite: boolean) {
+  public addToFavourite(
+    addToFavouriteBtn: HTMLButtonElement,
+    isAddedTofavourite: boolean
+  ) {
     if (addToFavouriteBtn) {
       addToFavouriteBtn.addEventListener("click", () => {
         if (isAddedTofavourite === false) {
