@@ -28,65 +28,36 @@ export class User {
     this.votedDown = [];
     this.favouriteComments = [];
     this.avatarUrl = "";
-    // this.saveUserToStorage();
   }
 
-  public voteUp(commentId: string): void {
-    if (!this.votedUp.includes(commentId)) {
-      this.votedUp.push(commentId);
-      this.saveUserToStorage();
-    }
-  }
-
-  public voteDown(commentId: string): void {
-    if (!this.votedDown.includes(commentId)) {
-      this.votedDown.push(commentId);
-      this.saveUserToStorage();
-    }
-  }
-
-  public addCommentToFavourites(commentId: string): void {
-    if (!this.favouriteComments.includes(commentId)) {
-      this.favouriteComments.push(commentId);
-      this.saveUserToStorage();
-    }
-  }
-
-  public getVotedUpComments(): string[] {
-    return this.votedUp;
-  }
-
-  public getVotedDownComments(): string[] {
-    return this.votedDown;
-  }
-
-  public getFavouriteComments(): string[] {
-    return this.favouriteComments;
-  }
-
-  private createAvatar(): void {
-    const numImages: number = 10;
-    const imageIndex: number = Math.floor(Math.random() * numImages);
-    const imageUrl: string = `https://picsum.photos/id/${imageIndex}/200`;
-    fetch(imageUrl)
-      .then((response) => {
-        if (response.ok) {
-          response.blob().then((blob) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(blob);
-            reader.onloadend = () => {
-              const imageUrl = reader.result as string;
-              this.avatarUrl = imageUrl;
-              this.saveUserToStorage();
-            };
-          });
-        } else {
-          console.log("Error retrieving avatar image");
-        }
-      })
-      .catch((error) => {
-        throw new Error(error);
-      });
+  public createAvatar(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const numImages: number = 10;
+      const imageIndex: number = Math.floor(Math.random() * numImages);
+      const imageUrl: string = `https://picsum.photos/id/${imageIndex}/200`;
+      fetch(imageUrl)
+        .then((response) => {
+          if (response.ok) {
+            response.blob().then((blob) => {
+              const reader = new FileReader();
+              reader.readAsDataURL(blob);
+              reader.onloadend = () => {
+                const imageUrl = reader.result as string;
+                this.avatarUrl = imageUrl;
+                this.saveUserToStorage();
+                resolve(this.avatarUrl);
+              };
+            });
+          } else {
+            console.log("Error retrieving avatar image");
+            reject(new Error("Error retrieving avatar image"));
+          }
+        })
+        .catch((error) => {
+          console.log("Error retrieving avatar image", error);
+          reject(new Error("Error retrieving avatar image"));
+        });
+    });
   }
 
   private saveUserToStorage(): void {
@@ -111,8 +82,7 @@ export class User {
       this.votedDown = user.votedDown;
       this.favouriteComments = user.favouriteComments;
       this.avatarUrl = user.avatarUrl;
-    }
-    else return false;
+    } else return false;
   }
 
   public userLogged() {
@@ -123,7 +93,7 @@ export class User {
     return this.name;
   }
 
-  public userHasAvatar() {
+  public userHasAvatar(): string {
     return this.avatarUrl;
   }
 }

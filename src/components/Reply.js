@@ -1,44 +1,22 @@
-import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentComponent } from "./Comment.js";
 export class ReplyComponent extends CommentComponent {
-    constructor(currentUser, avatar, timeStamp, text, id, votes, isAddedTofavourite, storedUser, storedAvatar) {
-        super(currentUser, avatar, timeStamp, text, id, votes, isAddedTofavourite, storedUser, storedAvatar);
-        // id: number = Services.generateId();
-        // currentUser: string = "";
-        // avatar: string = "";
-        // timeStamp: string  = Services.getCurrentTimeStamp();
-        // text: string  = "";
-        // votes: number = 0;
-        // isAddedTofavourite: boolean = false;
-        // interlocutor: string = "";
-        this.id = Services.generateId();
-        this.timeStamp = Services.getCurrentTimeStamp();
-        this.text = "";
-        this.votes = 0;
-        this.isAddedTofavourite = false;
-        this.currentUser = currentUser;
+    constructor(currentUserName, avatar, timeStamp, date, text, id, votes, isAddedTofavourite, storedUser, storedAvatar) {
+        super(currentUserName, avatar, timeStamp, date, text, id, votes, isAddedTofavourite, 0, storedUser, storedAvatar);
+        this.renderedReply = null;
+        this.currentUserName = currentUserName;
         this.avatar = avatar;
-        if (timeStamp !== undefined) {
-            this.timeStamp = timeStamp;
-        }
-        if (text !== undefined) {
-            this.text = text;
-        }
-        if (id !== undefined) {
-            this.id = id;
-        }
-        if (votes !== undefined) {
-            this.votes = votes;
-        }
-        if (isAddedTofavourite !== undefined) {
-            this.isAddedTofavourite = isAddedTofavourite;
-        }
+        this.timeStamp = timeStamp;
+        this.date = date;
+        this.text = text;
+        this.id = id;
+        this.votes = votes;
+        this.isAddedTofavourite = isAddedTofavourite;
         if (storedUser !== undefined) {
             this.storedUser = storedUser;
         }
         else
-            this.storedUser = this.currentUser;
+            this.storedUser = this.currentUserName;
         if (storedAvatar !== undefined) {
             this.storedAvatar = storedAvatar;
         }
@@ -50,6 +28,11 @@ export class ReplyComponent extends CommentComponent {
             "reply",
             "thread-item_layout",
         ]);
+        commentNode.setAttribute("data-reply-id", `${this.id}`);
+        commentNode.setAttribute("data-reply-date", `${this.date}`);
+        commentNode.setAttribute("data-reply-fav", `${this.isAddedTofavourite}`);
+        commentNode.setAttribute("data-reply-votes", `${this.votes}`);
+        commentNode.id = `reply-id-${this.id}`;
         const content = `
         <div class="avatar">
           <img
@@ -59,13 +42,13 @@ export class ReplyComponent extends CommentComponent {
             alt="Avatar"
           />
         </div>
-        <div class="comment-info-container">
-          <h4 class="username" id="username-${this.id}">${this.currentUser}</h4>
+        <div class="reply-info-container">
+          <h4 class="username reply-username" id="username-${this.id}">${this.currentUserName}</h4>
           <div class="replied-user-info o-text-18-op-4">
             <img class="replied-user-info__icon" src="../public/assets/interface-images/icon-reply.svg" alt="Replied to">
             <div class="replied-user-info__text" id="replied-user-name-${this.id}">${this.storedUser}</div>
           </div>
-          <time datetime="13:55 01-15" class="timestamp"
+          <time datetime="13:55 01-15" class="timestamp reply-timestamp"
             >${this.timeStamp}</time
           >
         </div>
@@ -111,18 +94,45 @@ export class ReplyComponent extends CommentComponent {
         DOMHelpsters.renderElement(commentNode, content);
     }
     updateReply() {
-        const addToFavouriteBtn = document.getElementById(`btn-fav-${this.id}`);
-        const downVoteBtn = document.getElementById(`downvote-${this.id}`);
-        const upVoteBtn = document.getElementById(`upvote-${this.id}`);
-        const countNode = document.getElementById(`btn-rating__count-${this.id}`);
-        if (downVoteBtn && upVoteBtn && countNode) {
-            downVoteBtn.addEventListener("click", () => {
-                this.countVotes("down", countNode);
+        this.renderedReply = document.getElementById(`reply-id-${this.id}`);
+        this.addToFavouriteBtn = document.getElementById(`btn-fav-${this.id}`);
+        this.downVoteBtn = document.getElementById(`downvote-${this.id}`);
+        this.upVoteBtn = document.getElementById(`upvote-${this.id}`);
+        this.countNode = document.getElementById(`btn-rating__count-${this.id}`);
+        if (this.downVoteBtn && this.upVoteBtn && this.countNode) {
+            this.downVoteBtn.addEventListener("click", () => {
+                var _a;
+                this.countVotes("down");
+                (_a = this.renderedReply) === null || _a === void 0 ? void 0 : _a.setAttribute("data-reply-votes", `${this.votes}`);
             });
-            upVoteBtn.addEventListener("click", () => {
-                this.countVotes("up", countNode);
+            this.upVoteBtn.addEventListener("click", () => {
+                var _a;
+                this.countVotes("up");
+                (_a = this.renderedReply) === null || _a === void 0 ? void 0 : _a.setAttribute("data-reply-votes", `${this.votes}`);
             });
         }
-        this.addToFavourite(addToFavouriteBtn, this.isAddedTofavourite);
+        this.btnFaveToggle();
+        this.addToFavourite();
+        this.countVoteColorToggle();
+    }
+    addToFavourite() {
+        if (this.addToFavouriteBtn) {
+            this.addToFavouriteBtn.addEventListener("click", () => {
+                if (this.isAddedTofavourite === false) {
+                    this.renderedReply.setAttribute("data-reply-fav", `${this.isAddedTofavourite}`);
+                    this.isAddedTofavourite = true;
+                    this.btnFaveToggle();
+                    this.commentThread.updateStoredData(this.id, "addedTofavourite", this.isAddedTofavourite);
+                }
+                else {
+                    this.renderedReply.setAttribute("data-reply-fav", `${this.isAddedTofavourite}`);
+                    this.isAddedTofavourite = false;
+                    this.btnFaveToggle();
+                    this.commentThread.updateStoredData(this.id, "addedTofavourite", this.isAddedTofavourite);
+                }
+            });
+        }
+        else
+            throw new Error("addToFavouriteBtn not found");
     }
 }

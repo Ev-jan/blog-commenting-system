@@ -1,64 +1,69 @@
-import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentFormComponent } from "./CommentForm.js";
 import { CommentThread } from "../services/CommentThread.js";
-import { User } from "./User.js";
 
 export class CommentComponent {
+  
+  // variables to handle data flow
+
   private formIsHidden: boolean = false;
-  id: number = Services.generateId();
-  currentUser: string;
+  protected commentThread: CommentThread = new CommentThread();
+  id: string;
+  currentUserName: string;
   avatar: string;
-  timeStamp: string = Services.getCurrentTimeStamp();
-  text: string = "";
-  votes: number = 0;
-  isAddedTofavourite: boolean = false;
+  timeStamp: string;
+  date: Date;
+  text: string;
+  votes: number;
+  isAddedTofavourite: boolean;
   storedUser?: string;
   storedAvatar?: string;
+  replyCount: number = 0;
+
+  // variables to access DOM elements
+
+  private commentUserNameNode: HTMLElement | null = null;
+  private commentUserAvatarNode: HTMLImageElement | null = null;
+  protected downVoteBtn: HTMLButtonElement | null = null;
+  protected upVoteBtn: HTMLButtonElement | null = null;
+  protected countNode: HTMLDivElement | null = null;
+  protected addToFavouriteBtn: HTMLButtonElement | null = null;
+  private replyBtn: HTMLButtonElement | null = null;
+  private commentFormParentNode: HTMLElement | null = null;
+  private replyForm: CommentFormComponent | null = null;
+  private textLenDisplayNode: HTMLElement | null = null;
+  private inputNode: HTMLTextAreaElement | null = null;
+  private overlimitMsgNode: HTMLElement | null = null;
+  private postButton: HTMLButtonElement | null = null;
+  private formUserAvatarNode: HTMLElement | null = null;
+  private formUserNameNode: HTMLElement | null = null;
+  private renderedComment: HTMLLIElement | null = null;
+  private replyListNode: HTMLUListElement | null = null;
 
   constructor(
-    currentUser: string,
+    currentUserName: string,
     avatar: string,
-    timeStamp?: string,
-    text?: string,
-    id?: number,
-    votes?: number,
-    isAddedTofavourite?: boolean,
-    storedUser: string = currentUser,
+    timeStamp: string,
+    date: Date,
+    text: string,
+    id: string,
+    votes: number,
+    isAddedTofavourite: boolean,
+    replyCount: number,
+    storedUser: string = currentUserName,
     storedAvatar: string = avatar
-
   ) {
-      this.currentUser = currentUser;
-      this.avatar = avatar;
-
-      if(timeStamp !== undefined){
-        this.timeStamp = timeStamp;
-      }
-      
-      if(text !== undefined){
-        this.text = text;
-      }
-
-      if(id !== undefined){
-        this.id = id;
-      }
-
-      if(votes !== undefined){
-        this.votes = votes;
-      }
-
-      if(isAddedTofavourite !== undefined){
-        this.isAddedTofavourite = isAddedTofavourite;
-      }
-
-      if(storedUser !== undefined){
-        this.storedUser = storedUser;
-      }
-
-      if(storedAvatar !== undefined){
-        this.storedAvatar = storedAvatar; 
-      }
-
+    this.currentUserName = currentUserName;
+    this.avatar = avatar;
+    this.timeStamp = timeStamp;
+    this.text = text;
+    this.id = id;
+    this.votes = votes;
+    this.isAddedTofavourite = isAddedTofavourite;
+    this.storedUser = storedUser;
+    this.replyCount = replyCount;
+    this.storedAvatar = storedAvatar;
+    this.date = date;
   }
 
   public createComment(parentNode: HTMLElement): void {
@@ -66,6 +71,12 @@ export class CommentComponent {
       "thread__item",
       "thread-item_layout",
     ]);
+    commentNode.setAttribute("data-comment-id", `${this.id}`);
+    commentNode.setAttribute("data-comment-date", `${this.date}`);
+    commentNode.setAttribute("data-comment-fav", `${this.isAddedTofavourite}`);
+    commentNode.setAttribute("data-comment-votes", `${this.votes}`);
+    commentNode.setAttribute("data-comment-replycount", `${this.replyCount}`);
+    commentNode.id = `comment-id-${this.id}`;
 
     const content: string = `
       <div class="avatar">
@@ -94,8 +105,7 @@ export class CommentComponent {
           Ответить
         </button>
         <button
-          class="btn-favourite button-style-default o-text-18-op-4" id="btn-favourite-${this.id}"
-          id="btn-fav"
+          class="btn-favourite btn-favourite__reply button-style-default o-text-18-op-4" id="btn-favourite-${this.id}"
         >
           <img
             class="button-icon"
@@ -135,150 +145,246 @@ export class CommentComponent {
   }
 
   public updateComment() {
-
-    
-    // upvote / downvote comments
-
-    const userAvatarNode = document.getElementById(
+    this.commentUserAvatarNode = document.getElementById(
       `comment-avatar-image-${this.id}`
     ) as HTMLImageElement;
-    const userNameNode = document.getElementById(`comment-username-${this.id}`);
-    const downVoteBtn = document.getElementById(
+    this.commentUserNameNode = document.getElementById(
+      `comment-username-${this.id}`
+    );
+    this.downVoteBtn = document.getElementById(
       `downvote-${this.id}`
     ) as HTMLButtonElement;
-    const upVoteBtn = document.getElementById(
+    this.upVoteBtn = document.getElementById(
       `upvote-${this.id}`
     ) as HTMLButtonElement;
-    const countNode = document.getElementById(
+    this.countNode = document.getElementById(
       `btn-rating__count-${this.id}`
     ) as HTMLDivElement;
-    const addToFavouriteBtn = document.getElementById(
+    this.addToFavouriteBtn = document.getElementById(
       `btn-favourite-${this.id}`
     ) as HTMLButtonElement;
+    this.renderedComment = document.getElementById(
+      `comment-id-${this.id}`
+    ) as HTMLLIElement;
+
+    // upvote and downvote comments
 
     if (
-      downVoteBtn &&
-      upVoteBtn &&
-      countNode &&
-      userNameNode &&
-      userAvatarNode )
-{
-      userAvatarNode.setAttribute("src", `${this.storedAvatar}`);
-      userNameNode.innerText = `${this.storedUser}`;
-      downVoteBtn.addEventListener("click", (event: Event) => {
-        this.countVotes("down", countNode);
+      this.downVoteBtn &&
+      this.upVoteBtn &&
+      this.countNode &&
+      this.commentUserNameNode &&
+      this.commentUserAvatarNode
+    ) {
+      this.commentUserAvatarNode.setAttribute("src", `${this.storedAvatar}`);
+      this.commentUserNameNode.innerText = `${this.storedUser}`;
+      this.downVoteBtn.addEventListener("click", (event: Event) => {
+        this.countVotes("down");
+        this.renderedComment?.setAttribute(
+          "data-comment-votes",
+          `${this.votes}`
+        );
       });
-      upVoteBtn.addEventListener("click", (event: Event) => {
-        this.countVotes("up", countNode);
+      this.upVoteBtn.addEventListener("click", (event: Event) => {
+        this.countVotes("up");
+        this.renderedComment?.setAttribute(
+          "data-comment-votes",
+          `${this.votes}`
+        );
       });
     } else throw new Error("voting elements not found");
 
     // add to and remove from favourites
 
-    this.addToFavourite(addToFavouriteBtn, this.isAddedTofavourite);
+    this.addToFavourite();
+    this.btnFaveToggle();
+    this.countVoteColorToggle();
 
     // post replies
 
-    const replyBtn = document.getElementById(
+    this.replyBtn = document.getElementById(
       `btn-reply-${this.id}`
     ) as HTMLButtonElement | null;
-    const commentFormParentNode = document.getElementById(`replies-${this.id}`);
-    if (replyBtn && commentFormParentNode) {
-      const replyForm = new CommentFormComponent(this.id, this.currentUser, this.avatar,); 
+    this.commentFormParentNode = document.getElementById(`replies-${this.id}`);
+    if (this.replyBtn && this.commentFormParentNode) {
+      this.replyForm = new CommentFormComponent(
+        this.id,
+        this.currentUserName,
+        this.avatar
+      );
       const toggleInput = (event: Event) => {
         if (this.formIsHidden === false) {
-          replyForm.createCommentForm(commentFormParentNode, "reply");
-          const inputNode = DOMHelpsters.getElementOOClass(
-            `comment-input-field-${this.id}`,                                              
+          this.replyForm!.createCommentForm(
+            this.commentFormParentNode,
+            "reply"
+          );
+          this.inputNode = DOMHelpsters.getElementOOClass(
+            `comment-input-field-${this.id}`,
             "comment-form__input"
           ) as HTMLTextAreaElement;
-          const textLenDisplayNode = DOMHelpsters.getElementOOClass(
-            `input-char-count-message-${this.id}`,                                        
+          this.textLenDisplayNode = DOMHelpsters.getElementOOClass(
+            `input-char-count-message-${this.id}`,
             "input-char-count-message"
-          );
-          const overlimitMsgNode = DOMHelpsters.getElementOOClass(
-            `overlimit-msg-${this.id}`,                                               
+          ) as HTMLElement;
+          this.overlimitMsgNode = DOMHelpsters.getElementOOClass(
+            `overlimit-msg-${this.id}`,
             "char-overlimit-message"
-          );
-          const postButton = DOMHelpsters.getElementOOClass(
-            `post-comment-btn-${this.id}`,                                                 
+          ) as HTMLElement;
+          this.postButton = DOMHelpsters.getElementOOClass(
+            `post-comment-btn-${this.id}`,
             "button-style-default o-text-18-op-4 submit-button"
           ) as HTMLButtonElement | null;
-
-          const userAvatarNode = document.getElementById(
-            `avatar-image-${this.id}`                                                         
+          this.formUserAvatarNode = document.getElementById(
+            `avatar-image-${this.id}`
           ) as HTMLImageElement;
-          const userNameNode = document.getElementById(`username-${this.id}`);               
+          this.formUserNameNode = document.getElementById(
+            `username-${this.id}`
+          );
 
-          // adding event listener to reply button to hide input field when clicking this button
+          // add event listener to reply button to hide input field when clicking the button
 
-          postButton?.addEventListener("click", (event: Event) => {
-            DOMHelpsters.deletElementById(`comment-form-${this.id}`);                         
+          this.postButton?.addEventListener("click", (event: Event) => {
+            DOMHelpsters.deletElementById(`comment-form-${this.id}`);
             this.formIsHidden = false;
           });
 
-          replyForm.updateCommentForm(
-            inputNode,
-            textLenDisplayNode,
-            overlimitMsgNode,
-            postButton,
-            commentFormParentNode,
-            userAvatarNode,
-            userNameNode,
+          // pass data to updateCommentForm to create new reply
+
+          this.replyForm!.updateCommentForm(
+            this.inputNode,
+            this.textLenDisplayNode,
+            this.overlimitMsgNode,
+            this.postButton,
+            this.commentFormParentNode,
+            this.formUserAvatarNode,
+            this.formUserNameNode,
             "reply",
-            this.storedUser, 
+            this.storedUser,
             this.storedAvatar
           );
-
           this.formIsHidden = true;
         } else {
           this.formIsHidden = false;
-          DOMHelpsters.deletElementById(`comment-form-${this.id}`);                         // changed ID here
+          DOMHelpsters.deletElementById(`comment-form-${this.id}`);
         }
       };
-      replyBtn.addEventListener("click", toggleInput, false);
+      this.replyBtn.addEventListener("click", toggleInput, false);
       this.formIsHidden = false;
     }
 
+    // keep track of new replies, store their qty for sorting purposes
 
-  }
+    this.replyListNode = document.getElementById(
+      `replies-${this.id}`
+    ) as HTMLUListElement;
 
-  public countVotes(vote: "up" | "down", countNode: HTMLDivElement): void {
-    if (vote === "up") {
-      this.votes++;
-    } else if (vote === "down") {
-      this.votes--;
-    }
-    if (this.votes < 0) {
-      countNode.style.color = "rgba(255, 0, 0, 1)";
-    } else if (this.votes > 0) {
-      countNode.style.color = "rgba(138, 197, 64, 1)";
+    if (this.replyListNode) {
+      const observer = new MutationObserver(
+        (mutationsList: MutationRecord[]) => {
+          for (const mutation of mutationsList) {
+            if (
+              mutation.type === "childList" &&
+              mutation.addedNodes.length > 0
+            ) {
+              for (const addedNode of mutation.addedNodes) {
+                if (
+                  addedNode instanceof HTMLLIElement &&
+                  addedNode.classList.contains("reply")
+                ) {
+                  this.replyCount = this.replyListNode!.children.length;
+                  this.renderedComment?.setAttribute(
+                    "data-comment-replycount",
+                    `${this.replyCount}`
+                  );
+                  this.commentThread.updateStoredData(
+                    this.id,
+                    "replyCount",
+                    this.replyCount
+                  );
+                }
+              }
+            }
+          }
+        }
+      );
+
+      observer.observe(this.replyListNode, { childList: true });
     } else {
-      countNode.style.color = "rgba(0, 0, 0, 1)";
+      throw new Error("replyListNode not found");
     }
-    countNode.textContent = `${this.votes}`;
   }
 
-  public addToFavourite(
-    addToFavouriteBtn: HTMLButtonElement,
-    isAddedTofavourite: boolean
-  ) {
-    if (addToFavouriteBtn) {
-      addToFavouriteBtn.addEventListener("click", () => {
-        if (isAddedTofavourite === false) {
-          addToFavouriteBtn.innerHTML = `<img class="button-icon"
-                                        src="../public/assets/interface-images/icon-saved.svg"
-                                        alt="add to favourite"
-                                        />
-                                        В избранном`;
-          isAddedTofavourite = true;
+  protected countVotes(vote: "up" | "down"): void {
+    if (vote === "up") {
+      this.downVoteBtn!.disabled = false;
+      this.votes++;
+      this.upVoteBtn!.disabled = true;
+      this.commentThread.updateStoredData(this.id, "votes", this.votes);
+    } else if (vote === "down") {
+      this.upVoteBtn!.disabled = false;
+      this.votes--;
+      this.downVoteBtn!.disabled = true;
+      this.commentThread.updateStoredData(this.id, "votes", this.votes);
+    }
+    this.countVoteColorToggle();
+  }
+
+  protected countVoteColorToggle() {
+    if (this.votes < 0) {
+      this.countNode!.style.color = "rgba(255, 0, 0, 1)";
+    } else if (this.votes > 0) {
+      this.countNode!.style.color = "rgba(138, 197, 64, 1)";
+    } else {
+      this.countNode!.style.color = "rgba(0, 0, 0, .4)";
+      this.upVoteBtn!.disabled = false;
+      this.downVoteBtn!.disabled = false;
+    }
+    this.countNode!.textContent = `${this.votes}`;
+  }
+
+  protected btnFaveToggle() {
+    if (this.isAddedTofavourite === true) {
+      this.addToFavouriteBtn!.innerHTML = `<img class="button-icon"
+      src="../public/assets/interface-images/icon-saved.svg"
+      alt="add to favourite"
+      />
+      В избранном`;
+    } else if (this.isAddedTofavourite === false) {
+      this.addToFavouriteBtn!.innerHTML = `<img class="button-icon"
+      src="../public/assets/interface-images/icon-save-to-fave.svg"
+      alt="add to favourite"
+      />
+      В избранное`;
+    }
+  }
+
+  protected addToFavourite() {
+    if (this.addToFavouriteBtn) {
+      this.addToFavouriteBtn.addEventListener("click", () => {
+        if (this.isAddedTofavourite === false) {
+          this.isAddedTofavourite = true;
+          this.commentThread.updateStoredData(
+            this.id,
+            "addedTofavourite",
+            this.isAddedTofavourite
+          );
+          this.renderedComment!.setAttribute(
+            "data-comment-fav",
+            `${this.isAddedTofavourite}`
+          );
+          this.btnFaveToggle();
         } else {
-          addToFavouriteBtn.innerHTML = `<img class="button-icon"
-                                        src="../public/assets/interface-images/icon-save-to-fave.svg"
-                                        alt="add to favourite"
-                                        />
-                                        В избранное`;
-          isAddedTofavourite = false;
+          this.isAddedTofavourite = false;
+          this.commentThread.updateStoredData(
+            this.id,
+            "addedTofavourite",
+            this.isAddedTofavourite
+          );
+          this.renderedComment!.setAttribute(
+            "data-comment-fav",
+            `${this.isAddedTofavourite}`
+          );
+          this.btnFaveToggle();
         }
       });
     } else throw new Error("addToFavouriteBtn not found");

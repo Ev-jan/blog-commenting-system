@@ -30,35 +30,41 @@
         <div class="comment-section">
           <hr class="rule" />
           <nav class="comment-navigation comment-section__comment-navigation">
-            <div class="comment-navigation__item">
-              <span>Комментарии</span>&nbsp;<span class="comment-count" id=""
+            <div class="comment-navigation__item  comment-navigation__item_active" id="comment-count-btn">
+              <span>Комментарии</span>&nbsp;<span class="comment-count-field" id="comment-count-nav-item"
                 >(0)</span
               >
             </div>
             <div class="drop-down-menu">
-              <div class="drop-down-btn comment-navigation__item">
-                По количеству оценок
+              <div class="wrapper">
+                <div class="drop-down-btn comment-navigation__item">
+                  По количеству оценок
+                </div>
                 <img
-                  class="comment-navigation__icon"
-                  src="../public/assets/interface-images/arrow-drop-down.svg"
-                  alt="dropdown menu"
-                />
-              </div>
-                <ul class="drop-down-content">
-                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По дате</button></li>
-                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По количеству оценок</button></li>
-                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По актуальности</button></li>
-                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button">По количеству ответов</button></li>
-                </ul>
-            </div>  
-            <div class="comment-navigation__item" id="comment-nav-sort-fav">
-              Избранное
-              <img
                 class="comment-navigation__icon"
-                src="../public/assets/interface-images/icon-favourite.svg"
-                alt="favourite comments"
+                src="../public/assets/interface-images/arrow-drop-down.svg"
+                alt="dropdown menu"
               />
+              </div>
+
+                <ul class="drop-down-content">
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button" id="sort-by-dated-btn">По дате</button></li>
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button" id="sort-by-vote-btn">По количеству оценок</button></li>
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button" id="sort-by-time-btn">По актуальности</button></li>
+                  <li class="drop-down-content__item"><button class="button-style-default drop-down-content__button"id="sort-by-repl-btn" >По количеству ответов</button></li>
+                </ul>
             </div>
+            <div class="wrapper">
+              <div class="comment-navigation__item" id="sort-by-fav-btn">
+                Избранное
+              </div>
+              <img
+              class="comment-navigation__icon"
+              src="../public/assets/interface-images/icon-favourite.svg"
+              alt="favourite comments"
+            />
+            </div>
+
           </nav>
           <ul class="comment-thread">
           </ul>

@@ -1,4 +1,3 @@
-// import { IComment, ICommentForm, IReply } from "../interfaces/Interfaces.js";
 import { Services } from "../services/services.js";
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 import { CommentComponent } from "./Comment.js";
@@ -8,17 +7,24 @@ import { CommentThread } from "../services/CommentThread.js";
 export class CommentFormComponent {
   private minTextLength: number = 1;
   private maxTextLength: number = 1001;
-  id: number;
-  currentUser: string = "";
+  id: string;
+  currentUserName: string = "";
   avatar: string = "../public/assets/interface-images/icon-default-avatar.png";
   text: string = "";
-  comment: CommentComponent;
-  reply: ReplyComponent;
+  comment: CommentComponent | null;
+  reply: ReplyComponent | null;
 
-  constructor(id: number, currentUser?: string, avatar?: string, text?: string) {
+  constructor(
+    id: string,
+    currentUserName?: string,
+    avatar?: string,
+    text?: string
+  ) {
     this.id = id;
-    if (currentUser !== undefined) {
-      this.currentUser = currentUser;
+    this.comment = null;
+    this.reply = null;
+    if (currentUserName !== undefined) {
+      this.currentUserName = currentUserName;
     }
     if (text !== undefined) {
       this.text = text;
@@ -26,8 +32,6 @@ export class CommentFormComponent {
     if (avatar !== undefined) {
       this.avatar = avatar;
     }
-    this.comment = new CommentComponent(this.currentUser, this.avatar);
-    this.reply = new ReplyComponent(this.currentUser, this.avatar);
   }
 
   public createCommentForm(
@@ -35,6 +39,7 @@ export class CommentFormComponent {
     commentType: string
   ): void {
     const commentFormNode: HTMLElement = DOMHelpsters.createElement("div");
+    commentFormNode.id = `comment-form-${this.id}`;
     const content: string = `<div class="comment-form comment-section__comment-form" id="comment-form-${this.id}">
     <div class="avatar comment-section__avatar">
       <img
@@ -45,7 +50,7 @@ export class CommentFormComponent {
       />
     </div>
     <div class="comment-info-container">
-      <h4 class="username" id="username-${this.id}">${this.currentUser}</h4>
+      <h4 class="username" id="username-${this.id}">${this.currentUserName}</h4>
       <p class="input-char-count-message" id="input-char-count-message-${this.id}">Макс. 1000 символов</p>
     </div>
     <p class="char-overlimit-message" id="overlimit-msg-${this.id}"></p>
@@ -73,9 +78,10 @@ export class CommentFormComponent {
     if (parentNode && commentType === "comment") {
       parentNode.insertBefore(commentFormNode, parentNode.children[2]);
       DOMHelpsters.renderElement(commentFormNode, content);
-    } else if (parentNode && commentType === "reply")
+    } else if (parentNode && commentType === "reply") {
       parentNode.insertBefore(commentFormNode, parentNode.firstChild);
-    DOMHelpsters.renderElement(commentFormNode, content);
+      DOMHelpsters.renderElement(commentFormNode, content);
+    }
   }
 
   public updateCommentForm(
@@ -92,13 +98,11 @@ export class CommentFormComponent {
   ) {
     let hasContent = false;
 
-// display current user's name and avatar on the input form
+    // display current user's name and avatar on the input form
 
     if (userAvatarNode && userNameNode) {
-      // this.currentUser = username;
-      // this.avatar = avatar;
       userAvatarNode.setAttribute("src", `${this.avatar}`);
-      userNameNode.innerText = `${this.currentUser}`;
+      userNameNode.innerText = `${this.currentUserName}`;
     }
     if (
       inputFieldNode &&
@@ -113,16 +117,22 @@ export class CommentFormComponent {
           this.text = Services.getInputValue(event) as string;
           textLenDisplayNode.textContent = `${this.text.length.toString()}/1000`;
           overlimitMsgNode.textContent = "";
+          textLenDisplayNode.style.color = "rgba(0, 0, 0)";
+          textLenDisplayNode.style.opacity = "0.4";
           hasContent = true;
           if (this.text.length > 1000) {
             postButton.disabled = true;
             overlimitMsgNode.textContent = "Слишком длинное сообщение";
+            textLenDisplayNode.style.color = "rgba(255, 0, 0, 1)";
+            textLenDisplayNode.style.opacity = "1";
           } else if (this.text.trim() === "") {
             postButton.disabled = true;
           } else {
             postButton.disabled = false;
           }
         } else {
+          textLenDisplayNode.style.color = "rgba(0, 0, 0)";
+          textLenDisplayNode.style.opacity = "0.4";
           textLenDisplayNode.textContent = "Макс. 1000 символов";
           overlimitMsgNode.textContent = "";
           postButton.disabled = true;
@@ -135,48 +145,75 @@ export class CommentFormComponent {
       postButton.addEventListener("click", (event: Event) => {
         event.preventDefault();
         if (hasContent && commentType === "comment") {
-          this.comment.id = Services.generateId();
-          this.comment.timeStamp = Services.getCurrentTimeStamp();
-          this.comment.currentUser = this.currentUser;
-          this.comment.avatar = this.avatar;
-          this.comment.text = this.text;
+          let id = Services.generateId();
+          let timeStamp = Services.getCurrentTimeStamp("timestamp") as string;
+          let date = Services.getCurrentTimeStamp("date") as Date;
+          let votes = 0;
+          let isAddedTofavourite = false;
+          let replyCount = 0;
+          this.comment = new CommentComponent(
+            this.currentUserName,
+            this.avatar,
+            timeStamp,
+            date,
+            this.text,
+            id,
+            votes,
+            isAddedTofavourite,
+            replyCount
+          );
           this.comment.createComment(commentParentNode);
           const storedComment = new CommentThread();
           storedComment.storeMessage(
             this.comment.id,
-            this.comment.currentUser,
+            this.comment.currentUserName,
             this.comment.avatar,
             this.comment.timeStamp,
+            this.comment.date,
             this.comment.text,
             this.comment.votes,
             this.comment.isAddedTofavourite,
+            this.comment.replyCount
           );
           this.comment.updateComment();
           hasContent = false;
           postButton.disabled = true;
         } else if (hasContent && commentType === "reply") {
-          this.reply.id = Services.generateId();
-          this.reply.timeStamp = Services.getCurrentTimeStamp();
-          this.reply.currentUser = this.currentUser;
-          this.reply.avatar = this.avatar;
-          this.reply.text = this.text;
+          let id = Services.generateId();
+          let timeStamp = Services.getCurrentTimeStamp("timestamp") as string;
+          let date = Services.getCurrentTimeStamp("date") as Date;
+          let votes = 0;
+          let isAddedTofavourite = false;
+          this.reply = new ReplyComponent(
+            this.currentUserName,
+            this.avatar,
+            timeStamp,
+            date,
+            this.text,
+            id,
+            votes,
+            isAddedTofavourite,
+            userFromStorage
+          );
+          this.reply.createReply(commentParentNode);
 
           // store new reply in localStorage
+
           const storedReply = new CommentThread();
           storedReply.storeMessage(
             this.reply.id,
             userFromStorage as string,
             avatarFromStorage as string,
             this.reply.timeStamp,
+            this.reply.date,
             this.reply.text,
             this.reply.votes,
             this.reply.isAddedTofavourite,
-            this.reply.currentUser,
+            NaN,
+            this.reply.currentUserName,
             this.reply.avatar,
             this.id
           );
-          this.reply.createReply(commentParentNode);
-
           this.reply.updateReply();
           hasContent = false;
           postButton.disabled = true;

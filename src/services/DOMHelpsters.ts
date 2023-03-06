@@ -1,4 +1,3 @@
-import { CommentComponent } from "../components/Comment";
 
 export class DOMHelpsters {
   static getElementOOClass(

@@ -19,58 +19,35 @@ export class User {
         this.votedDown = [];
         this.favouriteComments = [];
         this.avatarUrl = "";
-        // this.saveUserToStorage();
-    }
-    voteUp(commentId) {
-        if (!this.votedUp.includes(commentId)) {
-            this.votedUp.push(commentId);
-            this.saveUserToStorage();
-        }
-    }
-    voteDown(commentId) {
-        if (!this.votedDown.includes(commentId)) {
-            this.votedDown.push(commentId);
-            this.saveUserToStorage();
-        }
-    }
-    addCommentToFavourites(commentId) {
-        if (!this.favouriteComments.includes(commentId)) {
-            this.favouriteComments.push(commentId);
-            this.saveUserToStorage();
-        }
-    }
-    getVotedUpComments() {
-        return this.votedUp;
-    }
-    getVotedDownComments() {
-        return this.votedDown;
-    }
-    getFavouriteComments() {
-        return this.favouriteComments;
     }
     createAvatar() {
-        const numImages = 10;
-        const imageIndex = Math.floor(Math.random() * numImages);
-        const imageUrl = `https://picsum.photos/id/${imageIndex}/200`;
-        fetch(imageUrl)
-            .then((response) => {
-            if (response.ok) {
-                response.blob().then((blob) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(blob);
-                    reader.onloadend = () => {
-                        const imageUrl = reader.result;
-                        this.avatarUrl = imageUrl;
-                        this.saveUserToStorage();
-                    };
-                });
-            }
-            else {
-                console.log("Error retrieving avatar image");
-            }
-        })
-            .catch((error) => {
-            throw new Error(error);
+        return new Promise((resolve, reject) => {
+            const numImages = 10;
+            const imageIndex = Math.floor(Math.random() * numImages);
+            const imageUrl = `https://picsum.photos/id/${imageIndex}/200`;
+            fetch(imageUrl)
+                .then((response) => {
+                if (response.ok) {
+                    response.blob().then((blob) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = () => {
+                            const imageUrl = reader.result;
+                            this.avatarUrl = imageUrl;
+                            this.saveUserToStorage();
+                            resolve(this.avatarUrl);
+                        };
+                    });
+                }
+                else {
+                    console.log("Error retrieving avatar image");
+                    reject(new Error("Error retrieving avatar image"));
+                }
+            })
+                .catch((error) => {
+                console.log("Error retrieving avatar image", error);
+                reject(new Error("Error retrieving avatar image"));
+            });
         });
     }
     saveUserToStorage() {

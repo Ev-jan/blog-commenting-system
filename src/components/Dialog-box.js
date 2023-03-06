@@ -1,7 +1,6 @@
 import { DOMHelpsters } from "../services/DOMHelpsters.js";
 export class DialogBox {
-    constructor() {
-    }
+    constructor() { }
     create() {
         const parentNode = document.getElementById("body");
         const boxWrapper = DOMHelpsters.createElement("div", [
@@ -39,16 +38,16 @@ export class DialogBox {
                 else {
                     inputNode.value = "";
                     boxIinfo.textContent = "Your name must have at least 3 characters";
-                    let timer = setTimeout(() => {
+                    setTimeout(() => {
                         boxIinfo.textContent = "Input your name:";
                     }, 2000);
-                    clearTimeout(timer);
                 }
             };
             signUpBtn.addEventListener("click", userLogInteraction);
             cancelBtn.addEventListener("click", () => {
                 boxWrapper.remove();
                 reject(new Error("Cancelled"));
+                window.location.reload();
             });
         });
     }

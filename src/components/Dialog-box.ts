@@ -4,9 +4,7 @@ import { Services } from "../services/services.js";
 
 export class DialogBox {
   name: string | undefined;
-  constructor() {
-
-  }
+  constructor() {}
   public create() {
     const parentNode = document.getElementById("body");
     const boxWrapper: HTMLElement = DOMHelpsters.createElement("div", [
@@ -32,7 +30,9 @@ export class DialogBox {
       const signUpBtn = document.getElementById("signup") as HTMLButtonElement;
       const inputNode = document.getElementById("input") as HTMLInputElement;
       const cancelBtn = document.getElementById("cancel") as HTMLButtonElement;
-      const boxWrapper = document.querySelector(".boxWrapper") as HTMLDivElement;
+      const boxWrapper = document.querySelector(
+        ".boxWrapper"
+      ) as HTMLDivElement;
       const boxIinfo = document.getElementById("info") as HTMLParagraphElement;
       const minInput: number = 3;
 
@@ -45,16 +45,16 @@ export class DialogBox {
         } else {
           inputNode.value = "";
           boxIinfo.textContent = "Your name must have at least 3 characters";
-          let timer = setTimeout(() => {
+          setTimeout(() => {
             boxIinfo.textContent = "Input your name:";
           }, 2000);
-          clearTimeout(timer);
         }
       };
       signUpBtn.addEventListener("click", userLogInteraction);
       cancelBtn.addEventListener("click", () => {
         boxWrapper.remove();
         reject(new Error("Cancelled"));
+        window.location.reload();
       });
     });
   }

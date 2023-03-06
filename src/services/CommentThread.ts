@@ -24,28 +24,32 @@ export class CommentThread {
   }
 
   public storeMessage(
-    ownId: number,
+    ownId: string,
     storedUser: string,
     storedAvatar: string,
     timeStamp: string,
+    date: Date,
     text: string,
     votes: number,
     isAddedTofavourite: boolean,
+    replyCount: number,
     currentUser?: string,
     currentUserAvatar?: string,
-    parentId?: number,
+    parentId?: string
   ) {
     const commentToStore: ICommentThreadItem = {
       ownId: ownId,
       storedUser: storedUser,
       storedAvatar: storedAvatar,
       timeStamp: timeStamp,
+      date: date,
       text: text,
       votes: votes,
-      isAddedTofavourite: isAddedTofavourite,
+      addedTofavourite: isAddedTofavourite,
+      replyCount: replyCount,
       currentUser: currentUser,
       currentUserAvatar: currentUserAvatar,
-      parentId: parentId
+      parentId: parentId,
     };
     const commentToString = JSON.stringify(commentToStore);
     const commentThreadJSON = localStorage.getItem("commentThread");
@@ -58,7 +62,6 @@ export class CommentThread {
       }
     } else throw new Error("No commentThread available in localStorage");
   }
-  // Retrieve the entire comment thread from the localStorage even if only a specific comment needs to be updated
 
   public updateStoredData(
     commentId: string,
@@ -69,7 +72,7 @@ export class CommentThread {
     if (commentThread && commentThread.length > 0) {
       let updatedComments = commentThread.map((commentJSON: string) => {
         const comment: ICommentThreadItem = JSON.parse(commentJSON);
-        if (comment.OwnId === commentId) {
+        if (comment.ownId === commentId) {
           comment[fieldToUpdate] = updatedValue;
         }
         return JSON.stringify(comment);
@@ -86,6 +89,15 @@ export class CommentThread {
     } else {
       this.initCommentThread();
     }
+  }
+
+  public arrStringToArrObj(commentThread: string[]): ICommentThreadItem[] {
+    const arrOfObj: ICommentThreadItem[] = [];
+    for (const commentString of commentThread) {
+      const threadItem: ICommentThreadItem = JSON.parse(commentString);
+      arrOfObj.push(threadItem);
+    }
+    return arrOfObj;
   }
 
   private initCommentThread() {
