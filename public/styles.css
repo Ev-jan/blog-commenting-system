@@ -1,7 +1,7 @@
 @import "https://fonts.googleapis.com/css2?family=Inter&display=swap";
 
 html {
-  font-size: 62.5%; /*10px*/
+  font-size: 62.5%;
 }
 
 *,
@@ -10,7 +10,6 @@ html {
   box-sizing: border-box;
   margin: 0;
   border: none;
-  /* outline: rgb(255, 210, 47) solid 0.001rem; */
 }
 
 body {
