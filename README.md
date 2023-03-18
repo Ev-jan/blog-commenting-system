@@ -1,31 +1,22 @@
-# p-8-commenting-system
- TS project
- 
-ЗАДАЧА ПРОЕКТА
+# P-8-comments sytem
+_course project_
 
-Создать фронтенд-часть для модуля системы комментариев.
+## What is the main objective of this project?
 
-ФУНКЦИОНАЛЬНЫЕ ТРЕБОВАНИЯ
+Create the client side for a comments module of a blog.
 
-В реализованном проекте можно:
+## What is the app's functionality?
 
-добавлять комментарии. Так как проект не подразумевает создание серверной части, данные можно сохранять в браузере, а для тестирования использовать mock-данные (искусственные данные, имитирующие реальные).
-отвечать на уже существующие комментарии.
-задавать максимальную длину комментария (1000 символов). При превышении этого лимита пользователю запрещается публиковать комментарий (кнопка отправки комментария должна стать неактивной).
-изменять рейтинг комментария — увеличивать или уменьшать его на единицу. Каждый пользователь может менять рейтинг строго на единицу (не более). Данные о рейтинге и его изменении можно также хранить в браузере. Прописать это можно в localStorage, чтобы и после обновления страницы было видно, что пользователь уже поменял рейтинг комментария.
-добавлять комментарий в избранное. После добавления комментария в избранное должны изменяться иконка и текст (макет). При повторном нажатии все изменения отменяются и комментарий перестаёт быть избранным.
-сортировать все комментарии по различным параметрам — избранные, по дате размещения, количеству оценок, количеству ответов. По умолчанию используйте сортировку по дате размещения.
-ТРЕБОВАНИЯ К КОДУ
+With this app, user can:
 
-Проект выполнен с использованием TypeScript.
-На ES6-классах применено ООП.
-Соблюдено единообразие оформления кода: корректные отступы между смысловыми блоками, единый формат отступов от левого края (два или четыре пробела — на ваш выбор) и так далее.
-Все переменные, классы и функции имеют осмысленные имена.
-Проект следует принципам DRY (Don’t Repeat Yourself) и KISS (Keep It Short and Simple).
-Все комментарии хранятся в localStorage.
-Для генерирования аватаров пользователей применяются сторонние сервисы, например Picsum.
-Чтобы ментор мог запустить ваш проект на своём компьютере, проект должен хранить все зависимости в себе и не иметь никаких глобальных зависимостей, кроме NodeJS и NPM.
+1. Add comments. Obviously. Since the project does not involve creating the server side, data is saved in the localStorage.
+2. Reply to existing comments.
+3. Set a maximum length for comments of 1.000 characters. On crossing this limit, the user is not allowed to post a comment i.e. the comment submission button becomes inactive.
+4. Increment or decrement a comment rating by one. Each user can only change the rating once. Rating data is also stored in the localStorage.
+5. Add comments to favorites. Once the comment is added to favorites, the button icon and text will change. If the user clicks the button again, the status changes and the comment is no longer marked as a favorite.
+6. Sort all comments by various parameters such as _favorites_, _date of publication_, _number of ratings_, _number of replies_. By default, all comments are sorted by date.
 
-ТРЕБОВАНИЯ К ИНТЕРФЕЙСУ
-
-Дизайн итогового проекта должен полностью соответствовать исходному макету.
+## What skills did I improve through completing this project?
+* TypeScript
+* ES6 classes
+* Handling ES6 modules
